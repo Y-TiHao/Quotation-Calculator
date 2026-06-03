@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<title>DaigouCalc</title>
+<title>报价计算器</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007AFF">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -72,7 +74,6 @@ body {
   height: 52px; padding: 0 20px;
   max-width: 720px; margin: 0 auto;
 }
-.nav-title { font-size: 17px; font-weight: 600; color: var(--label); }
 .nav-btn {
   width: 34px; height: 34px; border-radius: 50%;
   background: none; border: none;
@@ -127,6 +128,7 @@ body {
   cursor: pointer; transition: background 0.1s;
 }
 .add-cost-item:active { background: var(--fill2); }
+.add-cost-item + .add-cost-item { border-top: 0.5px solid var(--sep); }
 
 /* ========== Card ========== */
 .card {
@@ -142,18 +144,7 @@ body {
   width: 72px; flex-shrink: 0;
   font-size: 15px; font-weight: 400; color: var(--label);
 }
-.input-field {
-  flex: 1; height: 34px; padding: 0;
-  border: none; background: transparent;
-  font-size: 15px; font-family: inherit; color: var(--label);
-  text-align: right;
-  -webkit-appearance: none; appearance: none;
-  -moz-appearance: textfield;
-}
-.input-field::-webkit-outer-spin-button,
-.input-field::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.input-field:focus { outline: none; }
-.input-field::placeholder { color: var(--placeholder); text-align: right; }
+.input-field,
 .input-field-cost {
   flex: 1; height: 34px; padding: 0;
   border: none; background: transparent;
@@ -162,28 +153,17 @@ body {
   -webkit-appearance: none; appearance: none;
   -moz-appearance: textfield;
 }
+.input-field::-webkit-outer-spin-button,
+.input-field::-webkit-inner-spin-button,
 .input-field-cost::-webkit-outer-spin-button,
 .input-field-cost::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.input-field:focus,
 .input-field-cost:focus { outline: none; }
+.input-field::placeholder,
 .input-field-cost::placeholder { color: var(--placeholder); text-align: right; }
 .input-suffix {
-  font-size: 15px; color: var(--secondary); flex-shrink: 0; width: 20px; text-align: center;
+  font-size: 15px; color: var(--secondary); flex-shrink: 0; min-width: 28px; text-align: right;
 }
-
-/* ========== Toggle ========== */
-.toggle-switch { position: relative; display: inline-block; width: 51px; height: 31px; flex-shrink: 0; }
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.toggle-slider {
-  position: absolute; cursor: pointer; inset: 0;
-  background: var(--fill1); border-radius: 31px; transition: 0.25s;
-}
-.toggle-slider::before {
-  position: absolute; content: ""; height: 27px; width: 27px;
-  left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.25s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-}
-.toggle-switch input:checked + .toggle-slider { background: var(--green); }
-.toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
 
 /* ========== Platform Select ========== */
 .platform-select {
@@ -198,16 +178,44 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%238E8E93' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
   }
 }
+.platform-select option { background: var(--card); color: var(--label); }
+
+/* ========== Nav Title ========== */
+.nav-title { font-size: 17px; font-weight: 700; letter-spacing: -0.2px; color: var(--label); }
 
 /* ========== Result ========== */
-.result-group { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
-.result-row { display: flex; justify-content: space-between; align-items: center; }
-.result-label { font-size: 15px; color: var(--secondary); }
-.result-value { font-size: 15px; font-weight: 500; color: var(--label); }
+.result-group { padding: 0; }
+.result-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 13px 16px;
+  border-bottom: 0.5px solid var(--sep);
+  transition: background 0.1s;
+}
+.result-row:last-child { border-bottom: none; }
+.result-row:active { background: var(--card-hover); }
+.result-label {
+  font-size: 15px; color: var(--secondary);
+  display: flex; align-items: center; gap: 8px;
+}
+.result-label-icon {
+  width: 28px; height: 28px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.result-label-icon.blue { background: rgba(0,122,255,0.12); color: var(--blue); }
+.result-label-icon.green { background: rgba(52,199,89,0.12); color: var(--green); }
+.result-label-icon.orange { background: rgba(255,149,0,0.12); color: var(--orange); }
+.result-label-icon.purple { background: rgba(175,82,222,0.12); color: var(--purple); }
+.result-label-icon.pink { background: rgba(255,45,85,0.12); color: var(--pink); }
+.result-label-icon.teal { background: rgba(90,200,250,0.12); color: var(--teal); }
+.result-value { font-size: 15px; font-weight: 600; color: var(--label); letter-spacing: -0.2px; }
 .result-value.positive { color: var(--green); }
 .result-value.negative { color: var(--red); }
 .result-value.accent { color: var(--blue); }
 .result-value.large { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+.result-divider {
+  height: 1px; background: var(--sep); margin: 0 16px;
+}
 
 /* ========== Profit Badge ========== */
 .profit-badge {
@@ -281,6 +289,7 @@ body {
   cursor: pointer; transition: background 0.1s;
 }
 .history-item:active { background: var(--card-hover); }
+.history-item + .history-item { border-top: 0.5px solid var(--sep); }
 .history-content { flex: 1; }
 .history-title { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
 .history-subtitle { font-size: 13px; color: var(--tertiary); }
@@ -362,7 +371,6 @@ body {
 }
 @media (max-width: 374px) {
   .input-label { width: 64px; font-size: 14px; }
-  .large-title { font-size: 28px; }
 }
 </style>
 </head>
@@ -371,13 +379,7 @@ body {
 <!-- Nav Bar -->
 <nav class="nav-bar">
   <div class="nav-bar-inner">
-    <div style="width:34px"></div>
-    <div class="nav-title"></div>
-    <button class="nav-btn" onclick="showSettings()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
-      </svg>
-    </button>
+    <span class="nav-title">报价计算器</span>
   </div>
 </nav>
 
@@ -444,7 +446,7 @@ body {
           </div>
           <div class="input-row">
             <span class="input-label">销售平台</span>
-            <select class="input-field platform-select" id="platformSelect">
+            <select class="input-field platform-select" id="platformSelect" onchange="onPlatformChange()">
               <option value="">请选择平台</option>
               <option value="0.6">咸鱼</option>
               <option value="5">得物</option>
@@ -470,37 +472,38 @@ body {
           <div class="profit-hero-value" id="netProfit">¥0.00<span class="profit-hero-unit"> / 件</span></div>
           <div class="profit-hero-sub">总利润: <span id="totalProfit">¥0.00</span> (<span id="dispQuantity">1</span>件)</div>
         </div>
+        <div class="result-divider"></div>
         <div class="result-group">
           <div class="result-row">
-            <span class="result-label">售价</span>
+            <span class="result-label"><span class="result-label-icon blue">💰</span>售价</span>
             <span class="result-value accent" id="dispSalePrice">¥0.00</span>
           </div>
           <div class="result-row">
-            <span class="result-label">毛利</span>
+            <span class="result-label"><span class="result-label-icon green">📈</span>毛利</span>
             <span class="result-value" id="grossProfit">¥0.00</span>
           </div>
           <div class="result-row">
-            <span class="result-label">毛利率</span>
+            <span class="result-label"><span class="result-label-icon green">📊</span>毛利率</span>
             <span class="result-value" id="grossMargin">0.00%</span>
           </div>
           <div class="result-row">
-            <span class="result-label">加价率</span>
+            <span class="result-label"><span class="result-label-icon orange">⬆️</span>加价率</span>
             <span class="result-value" id="markupRate">0.00%</span>
           </div>
           <div class="result-row">
-            <span class="result-label">净利率</span>
+            <span class="result-label"><span class="result-label-icon purple">💹</span>净利率</span>
             <span class="result-value" id="netMargin">0.00%</span>
           </div>
           <div class="result-row" id="fixedCostRow" style="display:none">
-            <span class="result-label">月固定成本</span>
+            <span class="result-label"><span class="result-label-icon pink">🏢</span>月固定成本</span>
             <span class="result-value" id="fixedCostPerUnit">¥0.00 / 月</span>
           </div>
           <div class="result-row" id="monthlyFixedRow" style="display:none">
-            <span class="result-label">日均摊成本</span>
+            <span class="result-label"><span class="result-label-icon pink">📅</span>日均摊成本</span>
             <span class="result-value" id="monthlyFixedTotal">¥0.00 / 天</span>
           </div>
           <div class="result-row" id="dailyFixedRow" style="display:none">
-            <span class="result-label">保本日均销量</span>
+            <span class="result-label"><span class="result-label-icon teal">🎯</span>保本日均销量</span>
             <span class="result-value" id="dailyFixedTotal">0.0 件/天</span>
           </div>
         </div>
@@ -511,6 +514,30 @@ body {
       <div class="section-label">不同售价利润速查</div>
       <div class="card">
         <div class="price-list" id="priceGrid"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">利润目标反算</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">目标净利率</span>
+            <input type="number" class="input-field" id="targetMargin" placeholder="如 20" step="0.1">
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-group" id="reverseResult">
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon blue">🎯</span>应定价</span>
+            <span class="result-value accent" id="reversePrice">--</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">💰</span>目标净利润</span>
+            <span class="result-value" id="reverseProfit">--</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -581,6 +608,60 @@ body {
       <button class="btn btn-secondary" onclick="clearHistory()">清空历史记录</button>
     </div>
   </div>
+
+  <!-- 月度汇总页 -->
+  <div id="tab-summary" class="tab-content">
+    <div class="section">
+      <div class="section-label">月度利润汇总</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">选择月份</span>
+            <input type="month" class="input-field" id="summaryMonth" style="font-size:15px;font-family:inherit">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="card" id="summaryCard">
+        <div class="profit-hero">
+          <div class="profit-hero-header">
+            <span class="profit-hero-label">月度总利润</span>
+            <span class="profit-badge" id="summaryBadge">--</span>
+          </div>
+          <div class="profit-hero-value" id="summaryTotalProfit">¥0.00</div>
+          <div class="profit-hero-sub">共 <span id="summaryCount">0</span> 笔交易</div>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-group">
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon blue">💰</span>总销售额</span>
+            <span class="result-value accent" id="summaryTotalSale">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon orange">📦</span>总采购额</span>
+            <span class="result-value" id="summaryTotalPurchase">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">📊</span>平均净利率</span>
+            <span class="result-value" id="summaryAvgMargin">0.00%</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon purple">💹</span>最高单笔利润</span>
+            <span class="result-value" id="summaryMaxProfit">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon pink">📉</span>最低单笔利润</span>
+            <span class="result-value" id="summaryMinProfit">¥0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section" style="margin-top:12px;display:flex;gap:12px">
+      <button class="btn btn-primary" onclick="exportData()" style="flex:1">📤 导出CSV</button>
+      <button class="btn btn-secondary" onclick="exportJSON()" style="flex:1">📋 导出JSON</button>
+    </div>
+  </div>
 </div>
 
 <!-- Tab Bar -->
@@ -607,33 +688,6 @@ body {
   </div>
 </div>
 
-<!-- Settings Modal -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeSettings()"></div>
-<div class="modal-sheet" id="modalSheet">
-  <div class="modal-handle"></div>
-  <div class="modal-header">
-    <div class="modal-title">设置</div>
-    <button class="modal-close" onclick="closeSettings()">✕</button>
-  </div>
-  <div class="modal-body">
-    <div class="section" style="margin:0">
-      <div class="section-label">默认设置</div>
-      <div class="card">
-        <div class="input-group">
-          <div class="input-row">
-            <span class="input-label">默认税率</span>
-            <input type="number" class="input-field" id="settingsDefaultTax" step="0.01" value="13">
-            <span class="input-suffix">%</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div style="margin-top:16px">
-      <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>
-    </div>
-  </div>
-</div>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -641,7 +695,8 @@ body {
 // ========== State ==========
 const state = {
   currentTab: 'calc',
-  history: JSON.parse(localStorage.getItem('daigou_history') || '[]')
+  history: JSON.parse(localStorage.getItem('daigou_history') || '[]'),
+  historyTimer: null
 };
 
 // ========== Init ==========
@@ -653,6 +708,7 @@ function init() {
     input.addEventListener('input', () => { calculateCost(); });
   });
   calculateCost();
+  renderHistory();
 }
 
 // ========== Cost Page ==========
@@ -674,10 +730,10 @@ function calculateCost() {
   }
 
   const items = [
-    { name: '固定工资', value: fixedSalary, color: '#007AFF' },
-    { name: '仓储费用', value: warehouseCost, color: '#FF9500' },
-    { name: '社保', value: socialInsurance, color: '#34C759' },
-    { name: '其他固定', value: otherFixedCost, color: '#AF52DE' }
+    { name: '固定工资', value: fixedSalary, color: 'var(--blue)' },
+    { name: '仓储费用', value: warehouseCost, color: 'var(--orange)' },
+    { name: '社保', value: socialInsurance, color: 'var(--green)' },
+    { name: '其他固定', value: otherFixedCost, color: 'var(--purple)' }
   ].filter(item => item.value > 0);
 
   let html = '<div class="input-group">';
@@ -806,13 +862,16 @@ function calculate() {
   renderPriceGrid(costWithoutPlatform);
 
   if (price > 0 && salePrice > 0) {
-    addHistory({
-      date: new Date().toISOString(), price, salePrice, quantity,
-      intlShipping, domShipping, packaging, otherCost, platformFeeRate,
-      fixedSalary, warehouseCost, socialInsurance, otherFixedCost,
-      netProfit: netProfitVal, totalProfit: totalProfitVal,
-      netMargin: netMarginVal, grossMargin: grossMarginVal
-    });
+    clearTimeout(state.historyTimer);
+    state.historyTimer = setTimeout(() => {
+      addHistory({
+        date: new Date().toISOString(), price, salePrice, quantity,
+        intlShipping, domShipping, packaging, otherCost, platformFeeRate,
+        fixedSalary, warehouseCost, socialInsurance, otherFixedCost,
+        netProfit: netProfitVal, totalProfit: totalProfitVal,
+        netMargin: netMarginVal, grossMargin: grossMarginVal
+      });
+    }, 1000);
   }
 }
 
@@ -820,8 +879,15 @@ function calculate() {
 function onPlatformChange() {
   const select = document.getElementById('platformSelect');
   const feeInput = document.getElementById('platformFee');
+  const feeRow = document.getElementById('platformFeeRow');
   const val = select.value;
-  feeInput.value = val !== '' ? val : '';
+  if (val !== '') {
+    feeInput.value = val;
+    feeRow.style.display = '';
+  } else {
+    feeInput.value = '';
+    feeRow.style.display = 'none';
+  }
   calculate();
 }
 
@@ -955,20 +1021,6 @@ function clearHistory() {
   }
 }
 
-// ========== Settings ==========
-function showSettings() {
-  document.getElementById('modalOverlay').classList.add('show');
-  document.getElementById('modalSheet').classList.add('show');
-}
-function closeSettings() {
-  document.getElementById('modalOverlay').classList.remove('show');
-  document.getElementById('modalSheet').classList.remove('show');
-}
-function saveSettings() {
-  closeSettings();
-  showToast('设置已保存');
-}
-
 // ========== Toast ==========
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -977,11 +1029,13 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-// ========== Resize ==========
-window.addEventListener('resize', () => {});
-
 // ========== Start ==========
 document.addEventListener('DOMContentLoaded', init);
+
+// ========== PWA Service Worker ==========
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+}
 </script>
 </body>
 </html>
