@@ -127,6 +127,15 @@ body {
 }
 .add-cost-btn:active { opacity: 0.5; }
 .add-cost-btn.active { background: var(--blue); color: #fff; }
+.remove-cost-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: none; background: var(--fill1);
+  font-size: 14px; font-weight: 400; color: var(--tertiary);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; line-height: 1; flex-shrink: 0; margin-left: 4px;
+}
+.remove-cost-btn:hover { background: #fee; color: #f44; }
+.remove-cost-btn:active { opacity: 0.5; }
 .add-cost-menu {
   display: none; position: absolute; right: 0; top: 34px;
   background: var(--card); border-radius: var(--radius-sm);
@@ -297,22 +306,62 @@ body {
 .profit-hero-unit { font-size: 15px; font-weight: 400; color: var(--secondary); }
 .profit-hero-sub { font-size: 13px; color: var(--tertiary); margin-top: 4px; }
 
-/* ========== Price List ========== */
-.price-list { padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
-.price-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 12px; border-radius: var(--radius-xs);
-  cursor: pointer; transition: background 0.1s;
+/* ========== Price Slider ========== */
+.slider-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 4px; margin-bottom: 8px;
 }
-.price-item:active { background: var(--card-hover); }
-.price-item-left { display: flex; flex-direction: column; gap: 1px; }
-.price-item-label { font-size: 11px; color: var(--tertiary); }
-.price-item-value { font-size: 17px; font-weight: 600; }
-.price-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
-.price-item-profit { font-size: 15px; font-weight: 600; }
-.price-item-profit.positive { color: var(--green); }
-.price-item-profit.negative { color: var(--red); }
-.price-item-margin { font-size: 11px; color: var(--tertiary); }
+.slider-label { font-size: 14px; color: var(--secondary); }
+.slider-value { font-size: 22px; font-weight: 700; color: var(--accent); }
+.price-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px; border-radius: 3px;
+  background: var(--fill1); outline: none;
+  margin: 8px 0;
+}
+.price-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--blue); cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+  transition: transform 0.1s;
+}
+.price-slider::-webkit-slider-thumb:active { transform: scale(1.15); }
+.price-slider::-moz-range-thumb {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--blue); cursor: pointer; border: none;
+  box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+}
+.slider-range {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--tertiary); padding: 0 2px;
+}
+.slider-result {
+  margin-top: 12px; padding: 12px;
+  background: var(--fill1); border-radius: var(--radius-sm);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.slider-result-row {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.slider-result-label { font-size: 13px; color: var(--secondary); }
+.slider-result-value { font-size: 15px; font-weight: 600; }
+.slider-result-value.positive { color: var(--green); }
+.slider-result-value.negative { color: var(--red); }
+
+/* ========== Quick Buttons ========== */
+.quick-btns {
+  display: flex; gap: 6px; padding: 0 4px; margin-top: -4px; margin-bottom: 4px;
+}
+.quick-btn {
+  padding: 5px 10px; border-radius: 14px;
+  border: 1px solid var(--sep); background: var(--fill1);
+  font-size: 12px; font-weight: 500; color: var(--secondary);
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+  white-space: nowrap;
+}
+.quick-btn:hover { background: var(--fill2); border-color: var(--blue); color: var(--blue); }
+.quick-btn:active { opacity: 0.6; transform: scale(0.96); }
 
 /* ========== Tab Bar ========== */
 .tab-bar {
@@ -436,8 +485,8 @@ body {
   .profit-hero { padding: 16px 12px 12px; }
   .result-row { padding: 11px 12px; }
   .input-group { padding: 10px 12px; gap: 12px; }
-  .price-item { padding: 8px 10px; }
-  .price-item-value { font-size: 15px; }
+  .slider-value { font-size: 18px; }
+  .slider-result { padding: 10px; }
   .btn { padding: 14px; font-size: 16px; }
   .tab-label { font-size: 9px; }
   .section-label { font-size: 12px; }
@@ -540,18 +589,140 @@ body {
   <div class="nav-bar-inner">
     <span class="nav-title">报价计算器</span>
     <div class="nav-tabs">
-      <button class="nav-tab active" onclick="switchTab('calc',0)">计算</button>
-      <button class="nav-tab" onclick="switchTab('cost',1)">成本</button>
-      <button class="nav-tab" onclick="switchTab('history',2)">历史</button>
-      <button class="nav-tab" onclick="switchTab('summary',3)">汇总</button>
+      <button class="nav-tab active" onclick="switchTab('quick',0)">速算</button>
+      <button class="nav-tab" onclick="switchTab('calc',1)">计算</button>
+      <button class="nav-tab" onclick="switchTab('cost',2)">成本</button>
+      <button class="nav-tab" onclick="switchTab('history',3)">历史</button>
+      <button class="nav-tab" onclick="switchTab('summary',4)">汇总</button>
     </div>
   </div>
 </nav>
 
 <!-- Content -->
 <div class="content">
+  <!-- 速算页 -->
+  <div id="tab-quick" class="tab-content active">
+    <div class="section">
+      <div class="section-label">快速算利润</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">采购价</span>
+            <input type="number" class="input-field" id="qPrice" placeholder="0.00" step="0.01" min="0">
+            <select class="input-suffix currency-suffix-select" id="qCurrency" onchange="onQCurrencyChange()">
+              <option value="CNY">¥ CNY</option>
+              <option value="HKD">HK$ HKD</option>
+              <option value="USD">$ USD</option>
+              <option value="JPY">¥ JPY</option>
+            </select>
+          </div>
+          <div class="input-row" id="qExchangeRateRow" style="display:none">
+            <span class="input-label">汇率</span>
+            <input type="number" class="input-field" id="qExchangeRate" placeholder="0.90" step="0.0001" value="0.90">
+            <span class="input-suffix" style="gap:4px;display:flex;align-items:center">
+              <span id="qRateLabel">HK$→¥</span>
+              <span class="rate-refresh" onclick="fetchQExchangeRate()" title="刷新汇率">↻</span>
+            </span>
+          </div>
+          <div class="input-row" id="qPriceCnyRow" style="display:none">
+            <span class="input-label">折合人民币</span>
+            <span class="result-value accent" id="qPriceCny" style="flex:1;text-align:right">¥0.00</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">销售价</span>
+            <input type="number" class="input-field" id="qSalePrice" placeholder="0.00" step="0.01" min="0">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="result-divider"></div>
+          <div class="input-row">
+            <span class="input-label">国际运费</span>
+            <input type="number" class="input-field" id="qIntlShipping" placeholder="0.00" step="0.01" min="0">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">国内运费</span>
+            <input type="number" class="input-field" id="qDomShipping" placeholder="0.00" step="0.01" min="0">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="quick-btns">
+            <button class="quick-btn" onclick="setQDomShipping(10)">普通快递 ¥10</button>
+            <button class="quick-btn" onclick="setQDomShipping(13)">顺丰 ¥13</button>
+          </div>
+          <div class="input-row">
+            <span class="input-label">包装费</span>
+            <input type="number" class="input-field" id="qPackaging" placeholder="0.00" step="0.01" min="0" value="2">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">其他费用</span>
+            <input type="number" class="input-field" id="qOtherCost" placeholder="0.00" step="0.01" min="0">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">手续费率</span>
+            <input type="number" class="input-field" id="qPlatformFee" placeholder="0" step="0.1" min="0">
+            <span class="input-suffix">%</span>
+          </div>
+          <div class="quick-btns">
+            <button class="quick-btn" onclick="setQPlatform(1.6)">闲鱼 1.6%</button>
+            <button class="quick-btn" onclick="setQPlatform(5)">得物 5%</button>
+            <button class="quick-btn" onclick="setQPlatform(0)">微信 0%</button>
+          </div>
+          <div class="input-row">
+            <span class="input-label">数量</span>
+            <input type="number" class="input-field" id="qQuantity" placeholder="1" min="1" value="1">
+            <span class="input-suffix">件</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="card">
+        <div class="profit-hero">
+          <div class="profit-hero-header">
+            <span class="profit-hero-label">边际净利润</span>
+            <span class="profit-badge" id="qProfitBadge">--</span>
+          </div>
+          <div class="profit-hero-value" id="qNetProfit">¥0.00<span class="profit-hero-unit"> / 件</span></div>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-group">
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon blue">💰</span>采购成本</span>
+            <span class="result-value" id="qCostDisplay">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon orange">📦</span>单件变动成本</span>
+            <span class="result-value" id="qVarCostDisplay">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon purple">💹</span>利润率</span>
+            <span class="result-value" id="qMarginDisplay">0.00%</span>
+          </div>
+          <div class="result-divider"></div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">💎</span>边际净利润总额</span>
+            <span class="result-value accent" id="qTotalProfit">¥0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="padding:14px 16px;border-radius:12px;background:var(--fill1);border:1px solid var(--sep);">
+        <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">💡 边际净利润说明</div>
+        <div style="font-size:12px;line-height:1.8;color:var(--secondary);">
+          <div><b>公式：</b>售价 − 采购成本 − 运费 − 包装费 − 其他费 − 平台手续费</div>
+          <div><b>含义：</b>每多卖一件额外赚的利润</div>
+          <div><b>注意：</b>不含固定成本（房租、工资等）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 计算页 -->
-  <div id="tab-calc" class="tab-content active">
+  <div id="tab-calc" class="tab-content">
 
     <div class="section">
       <div class="section-label">基本调整</div>
@@ -559,12 +730,12 @@ body {
         <div class="input-group">
           <div class="input-row">
             <span class="input-label">采购价</span>
-            <input type="number" class="input-field" id="price" placeholder="0.00" step="0.01">
+            <input type="number" class="input-field" id="price" placeholder="0.00" step="0.01" min="0">
             <select class="input-suffix currency-suffix-select" id="currencySelect" onchange="onCurrencyChange()">
-              <option value="CNY">¥</option>
-              <option value="HKD">HK$</option>
-              <option value="USD">$</option>
-              <option value="JPY">¥</option>
+              <option value="CNY">¥ CNY</option>
+              <option value="HKD">HK$ HKD</option>
+              <option value="USD">$ USD</option>
+              <option value="JPY">¥ JPY</option>
             </select>
           </div>
           <div class="input-row" id="exchangeRateRow" style="display:none">
@@ -581,7 +752,7 @@ body {
           </div>
           <div class="input-row">
             <span class="input-label">销售价</span>
-            <input type="number" class="input-field" id="salePrice" placeholder="0.00" step="0.01">
+            <input type="number" class="input-field" id="salePrice" placeholder="0.00" step="0.01" min="0">
             <span class="input-suffix">¥</span>
           </div>
           <div class="input-row">
@@ -618,13 +789,15 @@ body {
           </div>
           <div class="input-row" id="intlShippingRow" style="display:none">
             <span class="input-label">国际运费</span>
-            <input type="number" class="input-field" id="intlShipping" placeholder="0.00" step="0.01">
+            <input type="number" class="input-field" id="intlShipping" placeholder="0.00" step="0.01" min="0">
             <span class="input-suffix">¥</span>
+            <button class="remove-cost-btn" onclick="removeCostItem('intlShipping')" title="移除">×</button>
           </div>
           <div class="input-row" id="otherCostRow" style="display:none">
             <span class="input-label">其他费</span>
-            <input type="number" class="input-field" id="otherCost" placeholder="0.00" step="0.01">
+            <input type="number" class="input-field" id="otherCost" placeholder="0.00" step="0.01" min="0">
             <span class="input-suffix">¥</span>
+            <button class="remove-cost-btn" onclick="removeCostItem('otherCost')" title="移除">×</button>
           </div>
           <div class="input-row">
             <span class="input-label">销售平台</span>
@@ -644,15 +817,15 @@ body {
     </div>
 
     <div class="section">
-      <div class="section-label">利润分析</div>
+      <div class="section-label" style="display:flex;justify-content:space-between;align-items:center"><span>利润分析</span><button class="btn btn-primary" onclick="saveRecord()" style="font-size:12px;padding:4px 12px;border-radius:6px">💾 保存记录</button></div>
       <div class="card" id="profitCard">
         <div class="profit-hero">
           <div class="profit-hero-header">
-            <span class="profit-hero-label">净利润</span>
+            <span class="profit-hero-label">边际利润</span>
             <span class="profit-badge" id="profitBadge">--</span>
           </div>
           <div class="profit-hero-value" id="netProfit">¥0.00<span class="profit-hero-unit"> / 件</span></div>
-          <div class="profit-hero-sub">总利润: <span id="totalProfit">¥0.00</span> (<span id="dispQuantity">1</span>件)</div>
+          <div class="profit-hero-sub">边际利润总额: <span id="totalProfit">¥0.00</span> (<span id="dispQuantity">1</span>件)</div>
         </div>
         <div class="result-divider"></div>
         <div class="result-group">
@@ -673,29 +846,72 @@ body {
             <span class="result-value" id="markupRate">0.00%</span>
           </div>
           <div class="result-row">
-            <span class="result-label"><span class="result-label-icon purple">💹</span>净利率</span>
+            <span class="result-label"><span class="result-label-icon purple">💹</span>边际利润率</span>
             <span class="result-value" id="netMargin">0.00%</span>
           </div>
-          <div class="result-row" id="fixedCostRow" style="display:none">
+          <div class="result-divider"></div>
+          <div class="result-row">
             <span class="result-label"><span class="result-label-icon pink">🏢</span>月固定成本</span>
             <span class="result-value" id="fixedCostPerUnit">¥0.00 / 月</span>
           </div>
-          <div class="result-row" id="monthlyFixedRow" style="display:none">
+          <div class="result-row">
             <span class="result-label"><span class="result-label-icon pink">📅</span>日均摊成本</span>
             <span class="result-value" id="monthlyFixedTotal">¥0.00 / 天</span>
           </div>
-          <div class="result-row" id="dailyFixedRow" style="display:none">
+          <div class="result-row">
             <span class="result-label"><span class="result-label-icon teal">🎯</span>保本日均销量</span>
             <span class="result-value" id="breakevenDaily">0.0 件/天</span>
+          </div>
+          <div class="result-divider"></div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon blue">📦</span>预期月销量</span>
+            <span class="result-value" style="display:flex;align-items:center;gap:4px">
+              <input type="number" class="input-field" id="monthlySales" placeholder="0" min="0" step="1" style="width:80px;padding:4px 8px;font-size:14px;text-align:right">
+              <span style="color:var(--secondary);font-size:13px">件/月</span>
+            </span>
+          </div>
+          <div class="result-row" id="realProfitRow" style="display:none">
+            <span class="result-label"><span class="result-label-icon green">💎</span>真实净利润</span>
+            <span class="result-value" id="realProfit">¥0.00 / 月</span>
+          </div>
+          <div class="result-row" id="realMarginRow" style="display:none">
+            <span class="result-label"><span class="result-label-icon green">📊</span>真实净利率</span>
+            <span class="result-value" id="realMargin">0.00%</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-label">不同售价利润速查</div>
+      <div class="section-label">售价利润速查</div>
       <div class="card">
-        <div class="price-list" id="priceGrid"></div>
+        <div id="priceSliderArea">
+          <div class="slider-header">
+            <span class="slider-label">售价</span>
+            <span class="slider-value" id="sliderPriceDisplay">¥0.00</span>
+          </div>
+          <input type="range" class="price-slider" id="priceSlider" min="0" max="100" step="0.01" value="0" oninput="onSliderChange()">
+          <div class="slider-range">
+            <span id="sliderMin">¥0.00</span>
+            <span id="sliderMax">¥0.00</span>
+          </div>
+          <div class="slider-result">
+            <div class="slider-result-row">
+              <span class="slider-result-label">边际利润</span>
+              <span class="slider-result-value" id="sliderProfit">¥0.00 / 件</span>
+            </div>
+            <div class="slider-result-row">
+              <span class="slider-result-label">边际利润率</span>
+              <span class="slider-result-value" id="sliderMargin">0.0%</span>
+            </div>
+            <div class="slider-result-row">
+              <span class="slider-result-label">总边际利润</span>
+              <span class="slider-result-value" id="sliderTotalProfit">¥0.00</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="applySliderPrice()" style="width:100%;margin-top:8px">应用此售价</button>
+        </div>
+        <div id="priceSliderEmpty" style="padding:20px;text-align:center;color:var(--tertiary);font-size:14px;display:none">请输入采购价查看速查表</div>
       </div>
     </div>
 
@@ -708,6 +924,11 @@ body {
             <input type="number" class="input-field" id="targetMargin" placeholder="如 20" step="0.1">
             <span class="input-suffix">%</span>
           </div>
+          <div class="input-row">
+            <span class="input-label">预期月销量</span>
+            <input type="number" class="input-field" id="reverseMonthlySales" placeholder="0" min="0" step="1">
+            <span class="input-suffix">件/月</span>
+          </div>
         </div>
         <div class="result-divider"></div>
         <div class="result-group" id="reverseResult">
@@ -716,8 +937,12 @@ body {
             <span class="result-value accent" id="reversePrice">--</span>
           </div>
           <div class="result-row">
-            <span class="result-label"><span class="result-label-icon green">💰</span>目标净利润</span>
+            <span class="result-label"><span class="result-label-icon green">💰</span>目标边际利润</span>
             <span class="result-value" id="reverseProfit">--</span>
+          </div>
+          <div class="result-row" id="reverseRealProfitRow" style="display:none">
+            <span class="result-label"><span class="result-label-icon green">💎</span>真实净利润</span>
+            <span class="result-value" id="reverseRealProfit">--</span>
           </div>
         </div>
       </div>
@@ -743,7 +968,7 @@ body {
           </div>
           <div class="input-row">
             <span class="input-label">社保</span>
-            <input type="number" class="input-field-cost cost-input" id="socialInsurance" value="1663.26" readonly style="opacity:0.5">
+            <input type="number" class="input-field-cost cost-input" id="socialInsurance" value="1663.26" placeholder="0.00" step="0.01">
             <span class="input-suffix">¥/月</span>
           </div>
           <div class="input-row">
@@ -808,7 +1033,7 @@ body {
       <div class="card" id="summaryCard">
         <div class="profit-hero">
           <div class="profit-hero-header">
-            <span class="profit-hero-label">月度总利润</span>
+            <span class="profit-hero-label">月度边际利润总额</span>
             <span class="profit-badge" id="summaryBadge">--</span>
           </div>
           <div class="profit-hero-value" id="summaryTotalProfit">¥0.00</div>
@@ -825,16 +1050,25 @@ body {
             <span class="result-value" id="summaryTotalPurchase">¥0.00</span>
           </div>
           <div class="result-row">
-            <span class="result-label"><span class="result-label-icon green">📊</span>平均净利率</span>
+            <span class="result-label"><span class="result-label-icon green">📊</span>平均边际利润率</span>
             <span class="result-value" id="summaryAvgMargin">0.00%</span>
           </div>
           <div class="result-row">
-            <span class="result-label"><span class="result-label-icon purple">💹</span>最高单笔利润</span>
+            <span class="result-label"><span class="result-label-icon purple">💹</span>最高单笔边际利润</span>
             <span class="result-value" id="summaryMaxProfit">¥0.00</span>
           </div>
           <div class="result-row">
-            <span class="result-label"><span class="result-label-icon pink">📉</span>最低单笔利润</span>
+            <span class="result-label"><span class="result-label-icon pink">📉</span>最低单笔边际利润</span>
             <span class="result-value" id="summaryMinProfit">¥0.00</span>
+          </div>
+          <div class="result-divider"></div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon pink">🏢</span>月固定成本</span>
+            <span class="result-value" id="summaryFixedCost">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">💎</span>真实净利润</span>
+            <span class="result-value accent" id="summaryRealProfit">¥0.00</span>
           </div>
         </div>
       </div>
@@ -849,25 +1083,31 @@ body {
 <!-- Tab Bar -->
 <div class="tab-bar">
   <div class="tab-bar-inner">
-    <button class="tab-item active" onclick="switchTab('calc',0)">
+    <button class="tab-item active" onclick="switchTab('quick',0)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+      </svg>
+      <span class="tab-label">速算</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('calc',1)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
       </svg>
       <span class="tab-label">计算</span>
     </button>
-    <button class="tab-item" onclick="switchTab('cost',1)">
+    <button class="tab-item" onclick="switchTab('cost',2)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><circle cx="12" cy="12" r="5"/>
       </svg>
       <span class="tab-label">成本</span>
     </button>
-    <button class="tab-item" onclick="switchTab('history',2)">
+    <button class="tab-item" onclick="switchTab('history',3)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg>
       <span class="tab-label">历史</span>
     </button>
-    <button class="tab-item" onclick="switchTab('summary',3)">
+    <button class="tab-item" onclick="switchTab('summary',4)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <path d="M3 3h18v18H3zM7 7h4v4H7zM13 7h4v4h-4zM7 13h4v4H7zM13 13h4v4h-4z"/>
       </svg>
@@ -882,10 +1122,124 @@ body {
 <script>
 // ========== State ==========
 const state = {
-  currentTab: 'calc',
+  currentTab: 'quick',
   history: JSON.parse(localStorage.getItem('daigou_history') || '[]'),
   historyTimer: null
 };
+
+// ========== Quick Calc (速算页) ==========
+function quickCalc() {
+  const rawPrice = parseFloat(document.getElementById('qPrice').value) || 0;
+  const currency = document.getElementById('qCurrency').value;
+  const exchangeRate = parseFloat(document.getElementById('qExchangeRate').value) || 0.90;
+  const price = currency !== 'CNY' ? rawPrice * exchangeRate : rawPrice;
+  const domShipping = parseFloat(document.getElementById('qDomShipping').value) || 0;
+  const packaging = parseFloat(document.getElementById('qPackaging').value) || 0;
+  const intlShipping = parseFloat(document.getElementById('qIntlShipping').value) || 0;
+  const otherCost = parseFloat(document.getElementById('qOtherCost').value) || 0;
+  const platformFeeRate = parseFloat(document.getElementById('qPlatformFee').value) || 0;
+  const salePrice = parseFloat(document.getElementById('qSalePrice').value) || 0;
+  const quantity = parseInt(document.getElementById('qQuantity').value) || 1;
+
+  // 折合人民币
+  if (currency !== 'CNY') {
+    document.getElementById('qPriceCny').textContent = `¥${price.toFixed(2)}`;
+  }
+
+  const shippingPerUnit = (intlShipping + domShipping) / quantity;
+  const packagingPerUnit = packaging / quantity;
+  const otherPerUnit = otherCost / quantity;
+  const platformFeePerUnit = salePrice > 0 ? salePrice * (platformFeeRate / 100) : 0;
+  const totalVarCostPerUnit = price + shippingPerUnit + packagingPerUnit + otherPerUnit + platformFeePerUnit;
+
+  const netProfit = salePrice - totalVarCostPerUnit;
+  const totalProfit = netProfit * quantity;
+  const margin = salePrice > 0 ? (netProfit / salePrice * 100) : 0;
+
+  const profitClass = netProfit > 0 ? 'positive' : netProfit < 0 ? 'negative' : '';
+  const profitBadgeClass = netProfit > 0 ? (margin > 20 ? 'good' : 'warning') : 'danger';
+  const profitLabel = netProfit > 0 ? (margin > 20 ? '利润良好' : '利润偏低') : '亏损';
+
+  const netProfitEl = document.getElementById('qNetProfit');
+  netProfitEl.innerHTML = `¥${netProfit.toFixed(2)}<span class="profit-hero-unit"> / 件</span>`;
+  netProfitEl.className = `profit-hero-value ${profitClass}`;
+
+  const badge = document.getElementById('qProfitBadge');
+  badge.textContent = profitLabel;
+  badge.className = `profit-badge ${profitBadgeClass}`;
+
+  document.getElementById('qCostDisplay').textContent = `¥${price.toFixed(2)}`;
+  document.getElementById('qVarCostDisplay').textContent = `¥${(totalVarCostPerUnit - price).toFixed(2)}`;
+
+  const marginEl = document.getElementById('qMarginDisplay');
+  marginEl.textContent = `${margin.toFixed(2)}%`;
+  marginEl.className = `result-value ${profitClass}`;
+
+  const totalEl = document.getElementById('qTotalProfit');
+  totalEl.textContent = `¥${totalProfit.toFixed(2)}`;
+  totalEl.className = `result-value accent ${profitClass}`;
+}
+
+function onQCurrencyChange() {
+  const currency = document.getElementById('qCurrency').value;
+  const rateRow = document.getElementById('qExchangeRateRow');
+  const cnyRow = document.getElementById('qPriceCnyRow');
+  const rateLabel = document.getElementById('qRateLabel');
+  const otherCostInput = document.getElementById('qOtherCost');
+  if (currency !== 'CNY') {
+    rateRow.style.display = '';
+    cnyRow.style.display = '';
+    const symbol = CURRENCY_SYMBOLS[currency] || currency;
+    rateLabel.textContent = `${symbol}→¥`;
+    fetchQExchangeRate();
+    // 选择港币时预设其他费用为20
+    if (currency === 'HKD' && !otherCostInput.value) {
+      otherCostInput.value = '20';
+    }
+  } else {
+    rateRow.style.display = 'none';
+    cnyRow.style.display = 'none';
+  }
+  quickCalc();
+}
+
+function setQDomShipping(val) {
+  document.getElementById('qDomShipping').value = val;
+  quickCalc();
+}
+
+function setQPlatform(val) {
+  document.getElementById('qPlatformFee').value = val;
+  quickCalc();
+}
+
+async function fetchQExchangeRate() {
+  const currency = document.getElementById('qCurrency').value;
+  if (currency === 'CNY') return;
+
+  const apis = [
+    { url: `https://api.frankfurter.app/latest?from=${currency}&to=CNY`, parse: data => data.rates.CNY },
+    { url: `https://open.er-api.com/v6/latest/${currency}`, parse: data => data.rates.CNY },
+  ];
+
+  let rate = null;
+  for (const api of apis) {
+    try {
+      const res = await fetch(api.url);
+      if (!res.ok) continue;
+      const data = await res.json();
+      rate = api.parse(data);
+      if (rate) break;
+    } catch (e) { continue; }
+  }
+
+  if (rate) {
+    document.getElementById('qExchangeRate').value = rate.toFixed(4);
+    quickCalc();
+  } else {
+    showToast('汇率获取失败，请手动输入汇率');
+  }
+}
 
 // ========== Fetch Exchange Rate ==========
 const CURRENCY_SYMBOLS = {
@@ -936,43 +1290,11 @@ async function fetchExchangeRate() {
     }
   }
 
-  // fetch 全部失败时，尝试 JSONP 方式
-  if (!rate) {
-    try {
-      rate = await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          cleanup();
-          reject(new Error('JSONP timeout'));
-        }, 8000);
-        const cbName = '__rate_cb_' + Date.now();
-        const script = document.createElement('script');
-        window[cbName] = data => {
-          clearTimeout(timeout);
-          cleanup();
-          resolve(data.rates?.CNY || null);
-        };
-        script.onerror = () => {
-          clearTimeout(timeout);
-          cleanup();
-          reject(new Error('JSONP script error'));
-        };
-        function cleanup() {
-          delete window[cbName];
-          if (script.parentNode) script.parentNode.removeChild(script);
-        }
-        script.src = `https://api.frankfurter.app/latest?from=${currency}&to=CNY&callback=${cbName}`;
-        document.head.appendChild(script);
-      });
-    } catch (e) {
-      // JSONP 也失败
-    }
-  }
-
   if (rate) {
     document.getElementById('exchangeRate').value = rate.toFixed(4);
     calculate();
   } else {
-    console.warn('汇率获取失败，使用当前值');
+    showToast('汇率获取失败，请手动输入汇率');
   }
 
   refreshBtn.classList.remove('spinning');
@@ -980,14 +1302,28 @@ async function fetchExchangeRate() {
 
 // ========== Init ==========
 function init() {
-  document.querySelectorAll('.input-field').forEach(input => {
-    input.addEventListener('input', calculate);
+  document.querySelectorAll('.input-field:not(#tab-quick .input-field)').forEach(input => {
+    input.addEventListener('input', () => {
+      clearTimeout(state._calcTimer);
+      state._calcTimer = setTimeout(calculate, 150);
+    });
   });
   document.querySelectorAll('.cost-input').forEach(input => {
     input.addEventListener('input', () => { calculateCost(); });
   });
   document.getElementById('targetMargin').addEventListener('input', calculate);
+  document.getElementById('monthlySales').addEventListener('input', calculate);
+  document.getElementById('reverseMonthlySales').addEventListener('input', reverseCalculate);
   document.getElementById('summaryMonth').addEventListener('change', renderSummary);
+
+  // 速算页输入监听
+  document.querySelectorAll('#tab-quick .input-field').forEach(input => {
+    input.addEventListener('input', () => {
+      clearTimeout(state._qCalcTimer);
+      state._qCalcTimer = setTimeout(quickCalc, 100);
+    });
+  });
+
   // Set default month
   const now = new Date();
   document.getElementById('summaryMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -1066,7 +1402,7 @@ function calculate() {
   const rawPrice = parseFloat(document.getElementById('price').value) || 0;
   const currency = document.getElementById('currencySelect').value;
   const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 0.90;
-  const price = currency === 'HKD' ? rawPrice * exchangeRate : rawPrice;
+  const price = currency !== 'CNY' ? rawPrice * exchangeRate : rawPrice;
   const salePrice = parseFloat(document.getElementById('salePrice').value) || 0;
   const quantity = parseInt(document.getElementById('quantity').value) || 1;
   const intlShipping = parseFloat(document.getElementById('intlShipping').value) || 0;
@@ -1104,7 +1440,7 @@ function calculate() {
 
   const profitClass = netProfitVal > 0 ? (netMarginVal > 20 ? 'positive' : 'warning') : 'negative';
   const profitBadgeClass = netProfitVal > 0 ? (netMarginVal > 20 ? 'good' : 'warning') : 'danger';
-  const profitLabel = netProfitVal > 0 ? (netMarginVal > 20 ? '利润良好' : '利润偏低') : '亏损';
+  const profitLabel = netProfitVal > 0 ? (netMarginVal > 20 ? '边际利润良好' : '边际利润偏低') : '亏损';
 
   const netProfitEl = document.getElementById('netProfit');
   netProfitEl.innerHTML = `¥${netProfitVal.toFixed(2)}<span class="profit-hero-unit"> / 件</span>`;
@@ -1135,44 +1471,74 @@ function calculate() {
   netMarginEl.textContent = `${netMarginVal.toFixed(2)}%`;
   netMarginEl.className = `result-value ${netMarginVal > 0 ? 'positive' : netMarginVal < 0 ? 'negative' : ''}`;
 
-  const fixedCostRow = document.getElementById('fixedCostRow');
-  const monthlyFixedRow = document.getElementById('monthlyFixedRow');
-  const dailyFixedRow = document.getElementById('dailyFixedRow');
-  if (monthlyFixedTotal > 0) {
-    fixedCostRow.style.display = '';
-    monthlyFixedRow.style.display = '';
-    dailyFixedRow.style.display = '';
-    document.getElementById('fixedCostPerUnit').textContent = `¥${monthlyFixedTotal.toFixed(2)} / 月`;
-    document.getElementById('monthlyFixedTotal').textContent = `¥${dailyFixedTotal.toFixed(2)} / 天`;
-    const grossPerUnit = salePrice - costPerUnit;
-    if (grossPerUnit > 0) {
-      document.getElementById('breakevenDaily').textContent = `需售 ${(dailyFixedTotal / grossPerUnit).toFixed(1)} 件/天 保本`;
-    } else {
-      document.getElementById('breakevenDaily').textContent = '售价低于采购价，无法保本';
-    }
+  // 固定成本信息（始终显示）
+  document.getElementById('fixedCostPerUnit').textContent = `¥${monthlyFixedTotal.toFixed(2)} / 月`;
+  document.getElementById('monthlyFixedTotal').textContent = `¥${dailyFixedTotal.toFixed(2)} / 天`;
+  // 保本点：单位边际贡献 = 售价 − 全部单位变动成本（采购+运费+包装+其他+平台费）
+  const contribution = salePrice - totalCostPerUnit;
+  if (contribution > 0) {
+    document.getElementById('breakevenDaily').textContent = `需售 ${(dailyFixedTotal / contribution).toFixed(1)} 件/天 保本`;
   } else {
-    fixedCostRow.style.display = 'none';
-    monthlyFixedRow.style.display = 'none';
-    dailyFixedRow.style.display = 'none';
+    document.getElementById('breakevenDaily').textContent = monthlyFixedTotal > 0 ? '售价低于单位变动成本，无法保本' : '--';
+  }
+
+  // 真实净利润 = 边际利润总额 − 月固定成本
+  const monthlySales = parseInt(document.getElementById('monthlySales').value) || 0;
+  const realProfitRow = document.getElementById('realProfitRow');
+  const realMarginRow = document.getElementById('realMarginRow');
+  if (monthlySales > 0) {
+    realProfitRow.style.display = '';
+    realMarginRow.style.display = '';
+    const realProfitVal = netProfitVal * monthlySales - monthlyFixedTotal;
+    const realMarginVal = salePrice > 0 ? (realProfitVal / (salePrice * monthlySales) * 100) : 0;
+    const realProfitEl = document.getElementById('realProfit');
+    realProfitEl.textContent = `¥${realProfitVal.toFixed(2)} / 月`;
+    realProfitEl.className = `result-value ${realProfitVal > 0 ? 'positive' : realProfitVal < 0 ? 'negative' : ''}`;
+    const realMarginEl = document.getElementById('realMargin');
+    realMarginEl.textContent = `${realMarginVal.toFixed(2)}%`;
+    realMarginEl.className = `result-value ${realMarginVal > 0 ? 'positive' : realMarginVal < 0 ? 'negative' : ''}`;
+  } else {
+    realProfitRow.style.display = 'none';
+    realMarginRow.style.display = 'none';
   }
 
   const costWithoutPlatform = costPerUnit + shippingPerUnit + packagingPerUnit + otherPerUnit;
   renderPriceGrid(costWithoutPlatform);
   reverseCalculate();
 
-  if (price > 0 && salePrice > 0) {
-    clearTimeout(state.historyTimer);
-    state.historyTimer = setTimeout(() => {
-      addHistory({
-        date: new Date().toISOString(), price: rawPrice, salePrice, quantity,
-        intlShipping, domShipping, packaging, otherCost, platformFeeRate,
-        fixedSalary, warehouseCost, socialInsurance, otherFixedCost,
-        currency, exchangeRate,
-        netProfit: netProfitVal, totalProfit: totalProfitVal,
-        netMargin: netMarginVal, grossMargin: grossMarginVal
-      });
-    }, 1000);
+  // 保存当前计算状态，供手动保存时使用
+  state._lastCalc = {
+    rawPrice, salePrice, quantity,
+    intlShipping, domShipping, packaging, otherCost, platformFeeRate,
+    fixedSalary, warehouseCost, socialInsurance, otherFixedCost,
+    currency, exchangeRate,
+    netProfit: netProfitVal, totalProfit: totalProfitVal,
+    netMargin: netMarginVal, grossMargin: grossMarginVal,
+    monthlyFixedCost: monthlyFixedTotal
+  };
+}
+
+// ========== Save Record ==========
+function saveRecord() {
+  const c = state._lastCalc;
+  if (!c || !c.rawPrice || !c.salePrice) {
+    showToast('请先输入采购价和售价');
+    return;
   }
+  addHistory({
+    date: new Date().toISOString(),
+    price: c.rawPrice, salePrice: c.salePrice, quantity: c.quantity,
+    intlShipping: c.intlShipping, domShipping: c.domShipping,
+    packaging: c.packaging, otherCost: c.otherCost,
+    platformFeeRate: c.platformFeeRate,
+    fixedSalary: c.fixedSalary, warehouseCost: c.warehouseCost,
+    socialInsurance: c.socialInsurance, otherFixedCost: c.otherFixedCost,
+    currency: c.currency, exchangeRate: c.exchangeRate,
+    netProfit: c.netProfit, totalProfit: c.totalProfit,
+    netMargin: c.netMargin, grossMargin: c.grossMargin,
+    monthlyFixedCost: c.monthlyFixedCost
+  });
+  showToast('记录已保存');
 }
 
 // ========== Currency Change ==========
@@ -1241,42 +1607,102 @@ function addCostItem(type) {
   calculate();
 }
 
-// ========== Price Grid ==========
-function renderPriceGrid(costPerUnit) {
-  const grid = document.getElementById('priceGrid');
-  const platformFeeRate = parseFloat(document.getElementById('platformFee').value) || 0;
-  if (costPerUnit <= 0) {
-    grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--tertiary);font-size:14px">请输入采购价查看速查表</div>';
-    return;
+function removeCostItem(type) {
+  if (type === 'intlShipping') {
+    document.getElementById('intlShippingRow').style.display = 'none';
+    document.getElementById('intlShipping').value = '';
+  } else if (type === 'otherCost') {
+    document.getElementById('otherCostRow').style.display = 'none';
+    document.getElementById('otherCost').value = '';
   }
-  const prices = [];
-  for (let ratio = 0.8; ratio <= 2.0; ratio += 0.1) {
-    prices.push(Math.round(costPerUnit * ratio * 100) / 100);
-  }
-  let html = '';
-  prices.forEach(p => {
-    const platformFee = p * (platformFeeRate / 100);
-    const profit = p - costPerUnit - platformFee;
-    const margin = p > 0 ? (profit / p * 100) : 0;
-    const cls = profit > 0 ? 'positive' : profit < 0 ? 'negative' : '';
-    html += `<div class="price-item" onclick="applyPrice(${p})">
-      <div class="price-item-left">
-        <div class="price-item-label">售价</div>
-        <div class="price-item-value">¥${p.toFixed(0)}</div>
-      </div>
-      <div class="price-item-right">
-        <div class="price-item-profit ${cls}">${profit >= 0 ? '+' : ''}¥${profit.toFixed(1)}</div>
-        <div class="price-item-margin">净利率 ${margin.toFixed(1)}%</div>
-      </div>
-    </div>`;
-  });
-  grid.innerHTML = html;
+  calculate();
 }
 
-function applyPrice(p) {
-  document.getElementById('salePrice').value = p.toFixed(2);
+// ========== Price Slider ==========
+function renderPriceGrid(costPerUnit) {
+  const sliderArea = document.getElementById('priceSliderArea');
+  const sliderEmpty = document.getElementById('priceSliderEmpty');
+  const slider = document.getElementById('priceSlider');
+
+  if (costPerUnit <= 0) {
+    sliderArea.style.display = 'none';
+    sliderEmpty.style.display = '';
+    return;
+  }
+
+  sliderArea.style.display = '';
+  sliderEmpty.style.display = 'none';
+
+  // 设置滑动条范围：0.5x ~ 3x 成本
+  const minPrice = Math.round(costPerUnit * 0.5 * 100) / 100;
+  const maxPrice = Math.round(costPerUnit * 3.0 * 100) / 100;
+  slider.min = minPrice;
+  slider.max = maxPrice;
+  slider.step = Math.max(0.01, Math.round((maxPrice - minPrice) / 500 * 100) / 100);
+
+  // 如果当前滑块值不在范围内，设为成本价
+  const curVal = parseFloat(slider.value) || 0;
+  if (curVal < minPrice || curVal > maxPrice || curVal === 0) {
+    slider.value = costPerUnit;
+  }
+
+  document.getElementById('sliderMin').textContent = `¥${minPrice.toFixed(2)}`;
+  document.getElementById('sliderMax').textContent = `¥${maxPrice.toFixed(2)}`;
+
+  onSliderChange();
+}
+
+function onSliderChange() {
+  const slider = document.getElementById('priceSlider');
+  const salePrice = parseFloat(slider.value) || 0;
+  const platformFeeRate = parseFloat(document.getElementById('platformFee').value) || 0;
+  const quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+  // 获取成本（复用 calculate 中的逻辑）
+  const rawPrice = parseFloat(document.getElementById('price').value) || 0;
+  const currency = document.getElementById('currencySelect').value;
+  const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 0.90;
+  const price = currency !== 'CNY' ? rawPrice * exchangeRate : rawPrice;
+  const intlShipping = parseFloat(document.getElementById('intlShipping').value) || 0;
+  const domShipping = parseFloat(document.getElementById('domShipping').value) || 0;
+  const packaging = parseFloat(document.getElementById('packaging').value) || 0;
+  const otherCost = parseFloat(document.getElementById('otherCost').value) || 0;
+
+  const costPerUnit = price + (intlShipping + domShipping) / quantity + packaging / quantity + otherCost / quantity;
+  const platformFee = salePrice * (platformFeeRate / 100);
+  const totalCostPerUnit = costPerUnit + platformFee;
+  const profit = salePrice - totalCostPerUnit;
+  const margin = salePrice > 0 ? (profit / salePrice * 100) : 0;
+  const totalProfit = profit * quantity;
+
+  const profitCls = profit > 0 ? 'positive' : profit < 0 ? 'negative' : '';
+
+  document.getElementById('sliderPriceDisplay').textContent = `¥${salePrice.toFixed(2)}`;
+  document.getElementById('sliderPriceDisplay').className = `slider-value ${profitCls}`;
+
+  const profitEl = document.getElementById('sliderProfit');
+  profitEl.textContent = `${profit >= 0 ? '+' : ''}¥${profit.toFixed(2)} / 件`;
+  profitEl.className = `slider-result-value ${profitCls}`;
+
+  const marginEl = document.getElementById('sliderMargin');
+  marginEl.textContent = `${margin.toFixed(1)}%`;
+  marginEl.className = `slider-result-value ${profitCls}`;
+
+  const totalEl = document.getElementById('sliderTotalProfit');
+  totalEl.textContent = `¥${totalProfit.toFixed(2)}`;
+  totalEl.className = `slider-result-value ${profitCls}`;
+}
+
+function applySliderPrice() {
+  const slider = document.getElementById('priceSlider');
+  const salePrice = parseFloat(slider.value) || 0;
+  if (salePrice <= 0) {
+    showToast('请先拖动滑块选择售价');
+    return;
+  }
+  document.getElementById('salePrice').value = salePrice.toFixed(2);
   calculate();
-  showToast('已应用售价 ¥' + p.toFixed(2));
+  showToast('已应用售价 ¥' + salePrice.toFixed(2));
 }
 
 // ========== History ==========
@@ -1359,7 +1785,7 @@ function reverseCalculate() {
   const rawPrice = parseFloat(document.getElementById('price').value) || 0;
   const currency = document.getElementById('currencySelect').value;
   const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 0.90;
-  const price = currency === 'HKD' ? rawPrice * exchangeRate : rawPrice;
+  const price = currency !== 'CNY' ? rawPrice * exchangeRate : rawPrice;
   const intlShipping = parseFloat(document.getElementById('intlShipping').value) || 0;
   const domShipping = parseFloat(document.getElementById('domShipping').value) || 0;
   const packaging = parseFloat(document.getElementById('packaging').value) || 0;
@@ -1367,10 +1793,19 @@ function reverseCalculate() {
   const quantity = parseInt(document.getElementById('quantity').value) || 1;
   const platformFeeRate = parseFloat(document.getElementById('platformFee').value) || 0;
   const targetMargin = parseFloat(document.getElementById('targetMargin').value) || 0;
+  const reverseMonthlySales = parseInt(document.getElementById('reverseMonthlySales').value) || 0;
+  const fixedSalary = parseFloat(document.getElementById('fixedSalary').value) || 0;
+  const warehouseCost = parseFloat(document.getElementById('warehouseCost').value) || 0;
+  const socialInsurance = parseFloat(document.getElementById('socialInsurance').value) || 0;
+  const otherFixedCost = parseFloat(document.getElementById('otherFixedCost').value) || 0;
+  const monthlyFixedTotal = fixedSalary + warehouseCost + socialInsurance + otherFixedCost;
+
+  const reverseRealProfitRow = document.getElementById('reverseRealProfitRow');
 
   if (price <= 0 || targetMargin <= 0) {
     document.getElementById('reversePrice').textContent = '--';
     document.getElementById('reverseProfit').textContent = '--';
+    reverseRealProfitRow.style.display = 'none';
     return;
   }
 
@@ -1380,6 +1815,7 @@ function reverseCalculate() {
   if (targetPrice <= 0 || isNaN(targetPrice) || !isFinite(targetPrice)) {
     document.getElementById('reversePrice').textContent = '无法计算';
     document.getElementById('reverseProfit').textContent = '--';
+    reverseRealProfitRow.style.display = 'none';
     return;
   }
 
@@ -1388,6 +1824,17 @@ function reverseCalculate() {
 
   document.getElementById('reversePrice').textContent = `¥${targetPrice.toFixed(2)}`;
   document.getElementById('reverseProfit').textContent = `¥${targetProfit.toFixed(2)} / 件`;
+
+  // 真实净利润 = 边际利润 × 月销量 − 月固定成本
+  if (reverseMonthlySales > 0) {
+    reverseRealProfitRow.style.display = '';
+    const realProfit = targetProfit * reverseMonthlySales - monthlyFixedTotal;
+    const realProfitEl = document.getElementById('reverseRealProfit');
+    realProfitEl.textContent = `¥${realProfit.toFixed(2)} / 月`;
+    realProfitEl.className = `result-value ${realProfit > 0 ? 'positive' : realProfit < 0 ? 'negative' : ''}`;
+  } else {
+    reverseRealProfitRow.style.display = 'none';
+  }
 }
 
 // ========== Summary ==========
@@ -1403,14 +1850,19 @@ function renderSummary() {
   const count = records.length;
   const totalSale = records.reduce((s, r) => s + r.salePrice * r.quantity, 0);
   const totalPurchase = records.reduce((s, r) => s + r.price * r.quantity, 0);
-  const totalProfit = records.reduce((s, r) => s + r.totalProfit, 0);
+  const totalProfit = records.reduce((s, r) => s + r.totalProfit, 0); // 边际利润总额
   const avgMargin = totalSale > 0 ? (totalProfit / totalSale * 100) : 0;
   const maxProfit = count > 0 ? Math.max(...records.map(r => r.netProfit)) : 0;
   const minProfit = count > 0 ? Math.min(...records.map(r => r.netProfit)) : 0;
 
+  // 月固定成本：取该月最后一条记录的 monthlyFixedCost（同一个月只减一次）
+  const monthlyFixed = count > 0 ? (records[0].monthlyFixedCost || 0) : 0;
+  const realProfit = totalProfit - monthlyFixed; // 真实净利润
+  const realMargin = totalSale > 0 ? (realProfit / totalSale * 100) : 0;
+
   const profitClass = totalProfit > 0 ? 'positive' : totalProfit < 0 ? 'negative' : '';
-  const badgeClass = totalProfit > 0 ? (avgMargin > 20 ? 'good' : 'warning') : 'danger';
-  const badgeLabel = totalProfit > 0 ? (avgMargin > 20 ? '利润良好' : '利润偏低') : '亏损';
+  const badgeClass = realProfit > 0 ? (realMargin > 20 ? 'good' : 'warning') : 'danger';
+  const badgeLabel = realProfit > 0 ? (realMargin > 20 ? '盈利良好' : '盈利偏低') : '亏损';
 
   document.getElementById('summaryTotalProfit').textContent = `¥${totalProfit.toFixed(2)}`;
   document.getElementById('summaryTotalProfit').className = `profit-hero-value ${profitClass}`;
@@ -1422,6 +1874,10 @@ function renderSummary() {
   document.getElementById('summaryAvgMargin').textContent = `${avgMargin.toFixed(2)}%`;
   document.getElementById('summaryMaxProfit').textContent = `¥${maxProfit.toFixed(2)}`;
   document.getElementById('summaryMinProfit').textContent = `¥${minProfit.toFixed(2)}`;
+  document.getElementById('summaryFixedCost').textContent = `¥${monthlyFixed.toFixed(2)}`;
+  const realProfitEl = document.getElementById('summaryRealProfit');
+  realProfitEl.textContent = `¥${realProfit.toFixed(2)}`;
+  realProfitEl.className = `result-value accent ${realProfit > 0 ? 'positive' : realProfit < 0 ? 'negative' : ''}`;
 }
 
 // ========== Export ==========
@@ -1436,11 +1892,11 @@ function exportData() {
     });
   }
   if (records.length === 0) { showToast('没有可导出的数据'); return; }
-  const header = '日期,采购价,销售价,数量,国际运费,国内运费,包装费,其他费用,手续费率,净利润,总利润,净利率,毛利率';
+  const header = '日期,采购价,销售价,数量,国际运费,国内运费,包装费,其他费用,手续费率,固定工资,仓储费用,社保,其他固定,月固定成本,边际利润/件,边际利润总额,边际利润率,毛利率';
   const rows = records.map(r => {
     const d = new Date(r.date);
     const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    return [ds, r.price, r.salePrice, r.quantity, r.intlShipping, r.domShipping, r.packaging, r.otherCost, r.platformFeeRate, r.netProfit.toFixed(2), r.totalProfit.toFixed(2), r.netMargin.toFixed(2), r.grossMargin.toFixed(2)].join(',');
+    return [ds, r.price, r.salePrice, r.quantity, r.intlShipping, r.domShipping, r.packaging, r.otherCost, r.platformFeeRate, r.fixedSalary||0, r.warehouseCost||0, r.socialInsurance||0, r.otherFixedCost||0, (r.monthlyFixedCost||0).toFixed(2), r.netProfit.toFixed(2), r.totalProfit.toFixed(2), r.netMargin.toFixed(2), r.grossMargin.toFixed(2)].join(',');
   });
   const csv = '\uFEFF' + header + '\n' + rows.join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
