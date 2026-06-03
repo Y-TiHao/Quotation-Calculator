@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>DaigouCalc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ========== iOS 26 Light (default) ========== */
+:root {
+  color-scheme: light dark;
+  --bg: #F2F2F7;
+  --card: #FFFFFF;
+  --card-hover: rgba(0,0,0,0.02);
+  --label: #000000;
+  --secondary: #3C3C43; --tertiary: #3C3C4399;
+  --placeholder: #C3C3C7;
+  --sep: rgba(60,60,67,0.12);
+  --blue: #007AFF; --green: #34C759; --orange: #FF9500; --red: #FF3B30;
+  --purple: #AF52DE; --pink: #FF2D55; --teal: #5AC8FA;
+  --fill1: rgba(120,120,128,0.12);
+  --fill2: rgba(120,120,128,0.08);
+  --radius: 16px; --radius-sm: 12px; --radius-xs: 8px;
+  --safe-b: env(safe-area-inset-bottom,0px);
+  --safe-t: env(safe-area-inset-top,0px);
+}
+
+/* ========== Dark Mode ========== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --card: #1C1C1E;
+    --card-hover: rgba(255,255,255,0.04);
+    --label: #FFFFFF;
+    --secondary: #EBEBF5; --tertiary: #EBEBF599;
+    --placeholder: #48484A;
+    --sep: rgba(84,84,88,0.34);
+    --blue: #0A84FF; --green: #30D158; --orange: #FF9F0A; --red: #FF453A;
+    --purple: #BF5AF2; --pink: #FF375F; --teal: #64D2FF;
+    --fill1: rgba(120,120,128,0.24);
+    --fill2: rgba(120,120,128,0.16);
+  }
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { font-size:16px; }
+body {
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--label);
+  min-height: 100vh; min-height: 100dvh;
+  overflow-x: hidden;
+  padding-top: calc(var(--safe-t));
+  padding-bottom: calc(84px + var(--safe-b));
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== Nav Bar ========== */
+.nav-bar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(242,242,247,0.72);
+  backdrop-filter: saturate(200%) blur(20px);
+  -webkit-backdrop-filter: saturate(200%) blur(20px);
+}
+@media (prefers-color-scheme: dark) {
+  .nav-bar { background: rgba(0,0,0,0.72); }
+}
+.nav-bar-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px; padding: 0 20px;
+  max-width: 720px; margin: 0 auto;
+}
+.nav-title { font-size: 17px; font-weight: 600; color: var(--label); }
+.nav-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: none; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--blue); transition: opacity 0.15s;
+}
+.nav-btn:active { opacity: 0.5; }
+
+/* ========== Content ========== */
+.content { max-width: 720px; margin: 0 auto; padding: 0 0 24px; }
+.tab-content { display: none; animation: fadeIn 0.25s ease; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ========== Section ========== */
+.section { margin: 20px 16px 0; }
+.section-label {
+  font-size: 13px; font-weight: 600; color: var(--secondary);
+  text-transform: uppercase; letter-spacing: 0.02em;
+  margin-bottom: 8px; padding-left: 4px;
+}
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px; padding-left: 4px; padding-right: 4px;
+}
+
+/* ========== Add Cost ========== */
+.add-cost-wrapper { position: relative; }
+.add-cost-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: none; background: var(--fill1);
+  font-size: 17px; font-weight: 400; color: var(--blue);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; line-height: 1; font-family: inherit;
+}
+.add-cost-btn:active { opacity: 0.5; }
+.add-cost-btn.active { background: var(--blue); color: #fff; }
+.add-cost-menu {
+  display: none; position: absolute; right: 0; top: 34px;
+  background: var(--card); border-radius: var(--radius-sm);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 0 0 0.5px var(--sep);
+  min-width: 130px; z-index: 100; overflow: hidden;
+  animation: menuPop 0.18s ease;
+}
+@keyframes menuPop {
+  from { opacity:0; transform: scale(0.95) translateY(-2px); }
+  to { opacity:1; transform: scale(1) translateY(0); }
+}
+.add-cost-menu.show { display: block; }
+.add-cost-item {
+  padding: 11px 16px; font-size: 15px; color: var(--label);
+  cursor: pointer; transition: background 0.1s;
+}
+.add-cost-item:active { background: var(--fill2); }
+
+/* ========== Card ========== */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* ========== Input Group ========== */
+.input-group { padding: 12px 16px; display: flex; flex-direction: column; gap: 14px; }
+.input-row { display: flex; align-items: center; gap: 12px; }
+.input-label {
+  width: 72px; flex-shrink: 0;
+  font-size: 15px; font-weight: 400; color: var(--label);
+}
+.input-field {
+  flex: 1; height: 34px; padding: 0;
+  border: none; background: transparent;
+  font-size: 15px; font-family: inherit; color: var(--label);
+  text-align: right;
+  -webkit-appearance: none; appearance: none;
+  -moz-appearance: textfield;
+}
+.input-field::-webkit-outer-spin-button,
+.input-field::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.input-field:focus { outline: none; }
+.input-field::placeholder { color: var(--placeholder); text-align: right; }
+.input-field-cost {
+  flex: 1; height: 34px; padding: 0;
+  border: none; background: transparent;
+  font-size: 15px; font-family: inherit; color: var(--label);
+  text-align: right;
+  -webkit-appearance: none; appearance: none;
+  -moz-appearance: textfield;
+}
+.input-field-cost::-webkit-outer-spin-button,
+.input-field-cost::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.input-field-cost:focus { outline: none; }
+.input-field-cost::placeholder { color: var(--placeholder); text-align: right; }
+.input-suffix {
+  font-size: 15px; color: var(--secondary); flex-shrink: 0; width: 20px; text-align: center;
+}
+
+/* ========== Toggle ========== */
+.toggle-switch { position: relative; display: inline-block; width: 51px; height: 31px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--fill1); border-radius: 31px; transition: 0.25s;
+}
+.toggle-slider::before {
+  position: absolute; content: ""; height: 27px; width: 27px;
+  left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.25s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--green); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* ========== Platform Select ========== */
+.platform-select {
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23999' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 2px center;
+  padding-right: 16px; cursor: pointer;
+  color: var(--label); font-size: 15px;
+}
+@media (prefers-color-scheme: dark) {
+  .platform-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%238E8E93' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+  }
+}
+
+/* ========== Result ========== */
+.result-group { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.result-row { display: flex; justify-content: space-between; align-items: center; }
+.result-label { font-size: 15px; color: var(--secondary); }
+.result-value { font-size: 15px; font-weight: 500; color: var(--label); }
+.result-value.positive { color: var(--green); }
+.result-value.negative { color: var(--red); }
+.result-value.accent { color: var(--blue); }
+.result-value.large { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+
+/* ========== Profit Badge ========== */
+.profit-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 6px;
+  font-size: 12px; font-weight: 600;
+}
+.profit-badge.good { background: rgba(52,199,89,0.12); color: var(--green); }
+.profit-badge.warning { background: rgba(255,149,0,0.12); color: var(--orange); }
+.profit-badge.danger { background: rgba(255,59,48,0.12); color: var(--red); }
+
+/* ========== Profit Hero ========== */
+.profit-hero { padding: 20px 16px 16px; }
+.profit-hero-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.profit-hero-label { font-size: 15px; color: var(--secondary); }
+.profit-hero-value {
+  font-size: 34px; font-weight: 700; letter-spacing: -0.8px;
+  line-height: 1.15; color: var(--label); transition: color 0.25s;
+}
+.profit-hero-value.positive { color: var(--green); }
+.profit-hero-value.warning { color: var(--orange); }
+.profit-hero-value.negative { color: var(--red); }
+.profit-hero-unit { font-size: 15px; font-weight: 400; color: var(--secondary); }
+.profit-hero-sub { font-size: 13px; color: var(--tertiary); margin-top: 4px; }
+
+/* ========== Price List ========== */
+.price-list { padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
+.price-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; border-radius: var(--radius-xs);
+  cursor: pointer; transition: background 0.1s;
+}
+.price-item:active { background: var(--card-hover); }
+.price-item-left { display: flex; flex-direction: column; gap: 1px; }
+.price-item-label { font-size: 11px; color: var(--tertiary); }
+.price-item-value { font-size: 17px; font-weight: 600; }
+.price-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.price-item-profit { font-size: 15px; font-weight: 600; }
+.price-item-profit.positive { color: var(--green); }
+.price-item-profit.negative { color: var(--red); }
+.price-item-margin { font-size: 11px; color: var(--tertiary); }
+
+/* ========== Tab Bar ========== */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: calc(83px + var(--safe-b)); padding-bottom: var(--safe-b);
+  background: rgba(249,249,249,0.88);
+  backdrop-filter: saturate(200%) blur(20px);
+  -webkit-backdrop-filter: saturate(200%) blur(20px);
+  border-top: 0.5px solid var(--sep);
+  display: flex; z-index: 200;
+}
+@media (prefers-color-scheme: dark) {
+  .tab-bar { background: rgba(28,28,30,0.88); }
+}
+.tab-bar-inner { display: flex; max-width: 720px; margin: 0 auto; width: 100%; }
+.tab-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  padding-top: 6px; cursor: pointer; border: none;
+  background: none; color: var(--tertiary); transition: color 0.15s;
+  font-family: inherit;
+}
+.tab-item.active { color: var(--blue); }
+.tab-item:active { opacity: 0.5; }
+.tab-label { font-size: 10px; font-weight: 500; }
+
+/* ========== History ========== */
+.history-item {
+  display: flex; align-items: center; padding: 12px 16px;
+  cursor: pointer; transition: background 0.1s;
+}
+.history-item:active { background: var(--card-hover); }
+.history-content { flex: 1; }
+.history-title { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+.history-subtitle { font-size: 13px; color: var(--tertiary); }
+.history-value { font-size: 15px; font-weight: 500; text-align: right; }
+.history-profit { font-size: 12px; text-align: right; }
+.history-profit.positive { color: var(--green); }
+.history-profit.negative { color: var(--red); }
+
+/* ========== Modal ========== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.32);
+  z-index: 1000; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.show { opacity: 1; pointer-events: auto; }
+.modal-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--card); border-radius: var(--radius) var(--radius) 0 0;
+  max-height: 85vh; overflow-y: auto;
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25,0.1,0.25,1);
+  z-index: 1001;
+}
+.modal-overlay.show + .modal-sheet,
+.modal-sheet.show { transform: translateY(0); }
+.modal-handle { width: 36px; height: 5px; background: var(--fill1); border-radius: 3px; margin: 8px auto 0; }
+.modal-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 17px; font-weight: 600; }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--fill1); border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--secondary); font-size: 15px;
+}
+.modal-body { padding: 0 20px 32px; }
+
+/* ========== Button ========== */
+.btn {
+  display: block; width: 100%; padding: 16px;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 17px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s; text-align: center;
+  font-family: inherit;
+}
+.btn:active { opacity: 0.7; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-secondary { background: var(--fill1); color: var(--blue); }
+
+/* ========== Toast ========== */
+.toast {
+  position: fixed; bottom: calc(110px + var(--safe-b));
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--label); color: var(--bg);
+  padding: 12px 24px; border-radius: 100px;
+  font-size: 14px; font-weight: 500;
+  z-index: 2000; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ========== Cost Breakdown ========== */
+.breakdown-item { margin-bottom: 12px; }
+.breakdown-item:last-child { margin-bottom: 0; }
+.breakdown-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.breakdown-left { display: flex; align-items: center; gap: 8px; }
+.breakdown-dot { width: 8px; height: 8px; border-radius: 50%; }
+.breakdown-name { font-size: 13px; color: var(--secondary); }
+.breakdown-right { text-align: right; }
+.breakdown-val { font-size: 14px; font-weight: 500; }
+.breakdown-pct { font-size: 11px; color: var(--tertiary); margin-left: 4px; }
+.breakdown-bar { height: 4px; background: var(--fill2); border-radius: 2px; overflow: hidden; }
+.breakdown-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+
+/* ========== Responsive ========== */
+@media (min-width: 768px) {
+  body { padding-bottom: 0; }
+  .tab-bar { display: none; }
+  .section { margin-left: auto; margin-right: auto; max-width: 500px; }
+  .input-label { width: 90px; }
+}
+@media (max-width: 374px) {
+  .input-label { width: 64px; font-size: 14px; }
+  .large-title { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Nav Bar -->
+<nav class="nav-bar">
+  <div class="nav-bar-inner">
+    <div style="width:34px"></div>
+    <div class="nav-title"></div>
+    <button class="nav-btn" onclick="showSettings()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Content -->
+<div class="content">
+  <!-- 计算页 -->
+  <div id="tab-calc" class="tab-content active">
+
+    <div class="section">
+      <div class="section-label">基本调整</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">采购价</span>
+            <input type="number" class="input-field" id="price" placeholder="0.00" step="0.01">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">销售价</span>
+            <input type="number" class="input-field" id="salePrice" placeholder="0.00" step="0.01">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">数量</span>
+            <input type="number" class="input-field" id="quantity" placeholder="1" min="1" value="1">
+            <span class="input-suffix">件</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-label" style="margin-bottom:0">成本明细</span>
+        <div class="add-cost-wrapper">
+          <button class="add-cost-btn" id="addCostBtn" onclick="toggleAddCostMenu()">+</button>
+          <div class="add-cost-menu" id="addCostMenu">
+            <div class="add-cost-item" onclick="addCostItem('intlShipping')">国际运费</div>
+            <div class="add-cost-item" onclick="addCostItem('otherCost')">其他费用</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">国内运费</span>
+            <input type="number" class="input-field" id="domShipping" placeholder="0.00" step="0.01">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">包装费</span>
+            <input type="number" class="input-field" id="packaging" placeholder="0.00" step="0.01">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row" id="intlShippingRow" style="display:none">
+            <span class="input-label">国际运费</span>
+            <input type="number" class="input-field" id="intlShipping" placeholder="0.00" step="0.01">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row" id="otherCostRow" style="display:none">
+            <span class="input-label">其他费</span>
+            <input type="number" class="input-field" id="otherCost" placeholder="0.00" step="0.01">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">销售平台</span>
+            <select class="input-field platform-select" id="platformSelect">
+              <option value="">请选择平台</option>
+              <option value="0.6">咸鱼</option>
+              <option value="5">得物</option>
+            </select>
+          </div>
+          <div class="input-row" id="platformFeeRow">
+            <span class="input-label">手续费率</span>
+            <input type="number" class="input-field" id="platformFee" placeholder="0.00" step="0.01">
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">利润分析</div>
+      <div class="card" id="profitCard">
+        <div class="profit-hero">
+          <div class="profit-hero-header">
+            <span class="profit-hero-label">净利润</span>
+            <span class="profit-badge" id="profitBadge">--</span>
+          </div>
+          <div class="profit-hero-value" id="netProfit">¥0.00<span class="profit-hero-unit"> / 件</span></div>
+          <div class="profit-hero-sub">总利润: <span id="totalProfit">¥0.00</span> (<span id="dispQuantity">1</span>件)</div>
+        </div>
+        <div class="result-group">
+          <div class="result-row">
+            <span class="result-label">售价</span>
+            <span class="result-value accent" id="dispSalePrice">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">毛利</span>
+            <span class="result-value" id="grossProfit">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">毛利率</span>
+            <span class="result-value" id="grossMargin">0.00%</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">加价率</span>
+            <span class="result-value" id="markupRate">0.00%</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">净利率</span>
+            <span class="result-value" id="netMargin">0.00%</span>
+          </div>
+          <div class="result-row" id="fixedCostRow" style="display:none">
+            <span class="result-label">月固定成本</span>
+            <span class="result-value" id="fixedCostPerUnit">¥0.00 / 月</span>
+          </div>
+          <div class="result-row" id="monthlyFixedRow" style="display:none">
+            <span class="result-label">日均摊成本</span>
+            <span class="result-value" id="monthlyFixedTotal">¥0.00 / 天</span>
+          </div>
+          <div class="result-row" id="dailyFixedRow" style="display:none">
+            <span class="result-label">保本日均销量</span>
+            <span class="result-value" id="dailyFixedTotal">0.0 件/天</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">不同售价利润速查</div>
+      <div class="card">
+        <div class="price-list" id="priceGrid"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 成本页 -->
+  <div id="tab-cost" class="tab-content">
+    <div class="section">
+      <div class="section-label">月度固定成本</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">固定工资</span>
+            <input type="number" class="input-field-cost cost-input" id="fixedSalary" placeholder="0.00" step="0.01" value="7000">
+            <span class="input-suffix">¥/月</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">仓储费用</span>
+            <input type="number" class="input-field-cost cost-input" id="warehouseCost" placeholder="0.00" step="0.01" value="1000">
+            <span class="input-suffix">¥/月</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">社保</span>
+            <input type="number" class="input-field-cost cost-input" id="socialInsurance" value="1663.26" readonly style="opacity:0.5">
+            <span class="input-suffix">¥/月</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">其他固定</span>
+            <input type="number" class="input-field-cost cost-input" id="otherFixedCost" placeholder="0.00" step="0.01">
+            <span class="input-suffix">¥/月</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">成本汇总</div>
+      <div class="card">
+        <div class="result-group">
+          <div class="result-row">
+            <span class="result-label">月固定成本合计</span>
+            <span class="result-value accent" id="costMonthlyTotal">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">日均摊成本</span>
+            <span class="result-value" id="costDailyTotal">¥0.00 / 天</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">成本构成</div>
+      <div class="card" id="costBreakdown">
+        <div class="input-group" style="color:var(--tertiary);font-size:14px;text-align:center">请输入固定成本查看构成</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 历史页 -->
+  <div id="tab-history" class="tab-content">
+    <div class="section">
+      <div class="card" id="historyList">
+        <div style="padding:40px 16px;text-align:center;color:var(--tertiary);font-size:15px">暂无历史记录</div>
+      </div>
+    </div>
+    <div class="section" style="margin-top:12px">
+      <button class="btn btn-secondary" onclick="clearHistory()">清空历史记录</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <div class="tab-bar-inner">
+    <button class="tab-item active" onclick="switchTab('calc',0)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+      </svg>
+      <span class="tab-label">计算</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('cost',1)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><circle cx="12" cy="12" r="5"/>
+      </svg>
+      <span class="tab-label">成本</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('history',2)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span class="tab-label">历史</span>
+    </button>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeSettings()"></div>
+<div class="modal-sheet" id="modalSheet">
+  <div class="modal-handle"></div>
+  <div class="modal-header">
+    <div class="modal-title">设置</div>
+    <button class="modal-close" onclick="closeSettings()">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="section" style="margin:0">
+      <div class="section-label">默认设置</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">默认税率</span>
+            <input type="number" class="input-field" id="settingsDefaultTax" step="0.01" value="13">
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== State ==========
+const state = {
+  currentTab: 'calc',
+  history: JSON.parse(localStorage.getItem('daigou_history') || '[]')
+};
+
+// ========== Init ==========
+function init() {
+  document.querySelectorAll('.input-field').forEach(input => {
+    input.addEventListener('input', calculate);
+  });
+  document.querySelectorAll('.cost-input').forEach(input => {
+    input.addEventListener('input', () => { calculateCost(); });
+  });
+  calculateCost();
+}
+
+// ========== Cost Page ==========
+function calculateCost() {
+  const fixedSalary = parseFloat(document.getElementById('fixedSalary').value) || 0;
+  const warehouseCost = parseFloat(document.getElementById('warehouseCost').value) || 0;
+  const socialInsurance = parseFloat(document.getElementById('socialInsurance').value) || 0;
+  const otherFixedCost = parseFloat(document.getElementById('otherFixedCost').value) || 0;
+  const monthlyTotal = fixedSalary + warehouseCost + socialInsurance + otherFixedCost;
+  const dailyTotal = monthlyTotal / 30;
+
+  document.getElementById('costMonthlyTotal').textContent = `¥${monthlyTotal.toFixed(2)}`;
+  document.getElementById('costDailyTotal').textContent = `¥${dailyTotal.toFixed(2)} / 天`;
+
+  const breakdown = document.getElementById('costBreakdown');
+  if (monthlyTotal <= 0) {
+    breakdown.innerHTML = '<div class="input-group" style="color:var(--tertiary);font-size:14px;text-align:center">请输入固定成本查看构成</div>';
+    return;
+  }
+
+  const items = [
+    { name: '固定工资', value: fixedSalary, color: '#007AFF' },
+    { name: '仓储费用', value: warehouseCost, color: '#FF9500' },
+    { name: '社保', value: socialInsurance, color: '#34C759' },
+    { name: '其他固定', value: otherFixedCost, color: '#AF52DE' }
+  ].filter(item => item.value > 0);
+
+  let html = '<div class="input-group">';
+  items.forEach(item => {
+    const pct = (item.value / monthlyTotal * 100).toFixed(1);
+    html += `<div class="breakdown-item">
+      <div class="breakdown-top">
+        <div class="breakdown-left">
+          <div class="breakdown-dot" style="background:${item.color}"></div>
+          <span class="breakdown-name">${item.name}</span>
+        </div>
+        <div class="breakdown-right">
+          <span class="breakdown-val">¥${item.value.toFixed(2)}</span>
+          <span class="breakdown-pct">${pct}%</span>
+        </div>
+      </div>
+      <div class="breakdown-bar">
+        <div class="breakdown-fill" style="width:${pct}%;background:${item.color}"></div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  breakdown.innerHTML = html;
+
+  calculate();
+}
+
+// ========== Tab Switch ==========
+function switchTab(tab, index) {
+  state.currentTab = tab;
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach((t, i) => {
+    t.classList.toggle('active', i === index);
+  });
+}
+
+// ========== Calculate ==========
+function calculate() {
+  const price = parseFloat(document.getElementById('price').value) || 0;
+  const salePrice = parseFloat(document.getElementById('salePrice').value) || 0;
+  const quantity = parseInt(document.getElementById('quantity').value) || 1;
+  const intlShipping = parseFloat(document.getElementById('intlShipping').value) || 0;
+  const domShipping = parseFloat(document.getElementById('domShipping').value) || 0;
+  const packaging = parseFloat(document.getElementById('packaging').value) || 0;
+  const otherCost = parseFloat(document.getElementById('otherCost').value) || 0;
+  const platformFeeRate = parseFloat(document.getElementById('platformFee').value) || 0;
+  const fixedSalary = parseFloat(document.getElementById('fixedSalary').value) || 0;
+  const warehouseCost = parseFloat(document.getElementById('warehouseCost').value) || 0;
+  const socialInsurance = parseFloat(document.getElementById('socialInsurance').value) || 0;
+  const otherFixedCost = parseFloat(document.getElementById('otherFixedCost').value) || 0;
+
+  const monthlyFixedTotal = fixedSalary + warehouseCost + socialInsurance + otherFixedCost;
+  const dailyFixedTotal = monthlyFixedTotal / 30;
+
+  const costPerUnit = price;
+  const shippingPerUnit = (intlShipping + domShipping) / quantity;
+  const packagingPerUnit = packaging / quantity;
+  const otherPerUnit = otherCost / quantity;
+  const platformFeePerUnit = salePrice > 0 ? salePrice * (platformFeeRate / 100) : 0;
+  const totalCostPerUnit = costPerUnit + shippingPerUnit + packagingPerUnit + otherPerUnit + platformFeePerUnit;
+
+  const grossProfitVal = salePrice - costPerUnit;
+  const netProfitVal = salePrice - totalCostPerUnit;
+  const totalProfitVal = netProfitVal * quantity;
+
+  const grossMarginVal = salePrice > 0 ? (grossProfitVal / salePrice * 100) : 0;
+  const markupRateVal = costPerUnit > 0 ? (grossProfitVal / costPerUnit * 100) : 0;
+  const netMarginVal = salePrice > 0 ? (netProfitVal / salePrice * 100) : 0;
+
+  const profitClass = netProfitVal > 0 ? (netMarginVal > 20 ? 'positive' : 'warning') : 'negative';
+  const profitBadgeClass = netProfitVal > 0 ? (netMarginVal > 20 ? 'good' : 'warning') : 'danger';
+  const profitLabel = netProfitVal > 0 ? (netMarginVal > 20 ? '利润良好' : '利润偏低') : '亏损';
+
+  const netProfitEl = document.getElementById('netProfit');
+  netProfitEl.innerHTML = `¥${netProfitVal.toFixed(2)}<span class="profit-hero-unit"> / 件</span>`;
+  netProfitEl.className = `profit-hero-value ${profitClass}`;
+
+  document.getElementById('totalProfit').textContent = `¥${totalProfitVal.toFixed(2)}`;
+  document.getElementById('dispQuantity').textContent = quantity;
+
+  const badge = document.getElementById('profitBadge');
+  badge.textContent = profitLabel;
+  badge.className = `profit-badge ${profitBadgeClass}`;
+
+  document.getElementById('dispSalePrice').textContent = salePrice > 0 ? `¥${salePrice.toFixed(2)}` : '--';
+
+  const grossProfitEl = document.getElementById('grossProfit');
+  grossProfitEl.textContent = `¥${grossProfitVal.toFixed(2)}`;
+  grossProfitEl.className = `result-value ${grossProfitVal > 0 ? 'positive' : grossProfitVal < 0 ? 'negative' : ''}`;
+
+  const grossMarginEl = document.getElementById('grossMargin');
+  grossMarginEl.textContent = `${grossMarginVal.toFixed(2)}%`;
+  grossMarginEl.className = `result-value ${grossMarginVal > 0 ? 'positive' : grossMarginVal < 0 ? 'negative' : ''}`;
+
+  const markupRateEl = document.getElementById('markupRate');
+  markupRateEl.textContent = `${markupRateVal.toFixed(2)}%`;
+  markupRateEl.className = `result-value ${markupRateVal > 0 ? 'positive' : markupRateVal < 0 ? 'negative' : ''}`;
+
+  const netMarginEl = document.getElementById('netMargin');
+  netMarginEl.textContent = `${netMarginVal.toFixed(2)}%`;
+  netMarginEl.className = `result-value ${netMarginVal > 0 ? 'positive' : netMarginVal < 0 ? 'negative' : ''}`;
+
+  const fixedCostRow = document.getElementById('fixedCostRow');
+  const monthlyFixedRow = document.getElementById('monthlyFixedRow');
+  const dailyFixedRow = document.getElementById('dailyFixedRow');
+  if (monthlyFixedTotal > 0) {
+    fixedCostRow.style.display = '';
+    monthlyFixedRow.style.display = '';
+    dailyFixedRow.style.display = '';
+    document.getElementById('fixedCostPerUnit').textContent = `¥${monthlyFixedTotal.toFixed(2)} / 月`;
+    document.getElementById('monthlyFixedTotal').textContent = `¥${dailyFixedTotal.toFixed(2)} / 天`;
+    const grossPerUnit = salePrice - costPerUnit;
+    if (grossPerUnit > 0) {
+      document.getElementById('dailyFixedTotal').textContent = `需售 ${(dailyFixedTotal / grossPerUnit).toFixed(1)} 件/天 保本`;
+    } else {
+      document.getElementById('dailyFixedTotal').textContent = '售价低于采购价，无法保本';
+    }
+  } else {
+    fixedCostRow.style.display = 'none';
+    monthlyFixedRow.style.display = 'none';
+    dailyFixedRow.style.display = 'none';
+  }
+
+  const costWithoutPlatform = costPerUnit + shippingPerUnit + packagingPerUnit + otherPerUnit;
+  renderPriceGrid(costWithoutPlatform);
+
+  if (price > 0 && salePrice > 0) {
+    addHistory({
+      date: new Date().toISOString(), price, salePrice, quantity,
+      intlShipping, domShipping, packaging, otherCost, platformFeeRate,
+      fixedSalary, warehouseCost, socialInsurance, otherFixedCost,
+      netProfit: netProfitVal, totalProfit: totalProfitVal,
+      netMargin: netMarginVal, grossMargin: grossMarginVal
+    });
+  }
+}
+
+// ========== Platform Select ==========
+function onPlatformChange() {
+  const select = document.getElementById('platformSelect');
+  const feeInput = document.getElementById('platformFee');
+  const val = select.value;
+  feeInput.value = val !== '' ? val : '';
+  calculate();
+}
+
+// ========== Add Cost ==========
+function toggleAddCostMenu() {
+  const menu = document.getElementById('addCostMenu');
+  const btn = document.getElementById('addCostBtn');
+  const isOpen = menu.classList.contains('show');
+  menu.classList.toggle('show');
+  btn.classList.toggle('active');
+  if (!isOpen) {
+    setTimeout(() => {
+      document.addEventListener('click', closeAddCostMenu, { once: true });
+    }, 10);
+  }
+}
+function closeAddCostMenu(e) {
+  const wrapper = document.querySelector('.add-cost-wrapper');
+  if (!wrapper.contains(e.target)) {
+    document.getElementById('addCostMenu').classList.remove('show');
+    document.getElementById('addCostBtn').classList.remove('active');
+  }
+}
+function addCostItem(type) {
+  if (type === 'intlShipping') {
+    document.getElementById('intlShippingRow').style.display = '';
+  } else if (type === 'otherCost') {
+    document.getElementById('otherCostRow').style.display = '';
+  }
+  document.getElementById('addCostMenu').classList.remove('show');
+  document.getElementById('addCostBtn').classList.remove('active');
+  calculate();
+}
+
+// ========== Price Grid ==========
+function renderPriceGrid(costPerUnit) {
+  const grid = document.getElementById('priceGrid');
+  const platformFeeRate = parseFloat(document.getElementById('platformFee').value) || 0;
+  if (costPerUnit <= 0) {
+    grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--tertiary);font-size:14px">请输入采购价查看速查表</div>';
+    return;
+  }
+  const prices = [];
+  for (let ratio = 0.8; ratio <= 2.0; ratio += 0.1) {
+    prices.push(Math.round(costPerUnit * ratio * 100) / 100);
+  }
+  let html = '';
+  prices.forEach(p => {
+    const platformFee = p * (platformFeeRate / 100);
+    const profit = p - costPerUnit - platformFee;
+    const margin = p > 0 ? (profit / p * 100) : 0;
+    const cls = profit > 0 ? 'positive' : profit < 0 ? 'negative' : '';
+    html += `<div class="price-item" onclick="applyPrice(${p})">
+      <div class="price-item-left">
+        <div class="price-item-label">售价</div>
+        <div class="price-item-value">¥${p.toFixed(0)}</div>
+      </div>
+      <div class="price-item-right">
+        <div class="price-item-profit ${cls}">${profit >= 0 ? '+' : ''}¥${profit.toFixed(1)}</div>
+        <div class="price-item-margin">净利率 ${margin.toFixed(1)}%</div>
+      </div>
+    </div>`;
+  });
+  grid.innerHTML = html;
+}
+
+function applyPrice(p) {
+  document.getElementById('salePrice').value = p.toFixed(2);
+  calculate();
+  showToast('已应用售价 ¥' + p.toFixed(2));
+}
+
+// ========== History ==========
+function addHistory(record) {
+  state.history.unshift(record);
+  if (state.history.length > 30) state.history = state.history.slice(0, 30);
+  localStorage.setItem('daigou_history', JSON.stringify(state.history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (state.history.length === 0) {
+    list.innerHTML = '<div style="padding:40px 16px;text-align:center;color:var(--tertiary);font-size:15px">暂无历史记录</div>';
+    return;
+  }
+  let html = '';
+  state.history.forEach((r, i) => {
+    const d = new Date(r.date);
+    const ds = `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    const cls = r.netProfit >= 0 ? 'positive' : 'negative';
+    html += `<div class="history-item" onclick="loadHistory(${i})">
+      <div class="history-content">
+        <div class="history-title">采购 ¥${r.price.toFixed(0)} → 销售 ¥${r.salePrice.toFixed(0)} × ${r.quantity}</div>
+        <div class="history-subtitle">${ds}</div>
+      </div>
+      <div>
+        <div class="history-value">¥${r.totalProfit.toFixed(0)}</div>
+        <div class="history-profit ${cls}">${r.netMargin.toFixed(1)}%</div>
+      </div>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function loadHistory(i) {
+  const r = state.history[i];
+  document.getElementById('price').value = r.price || 0;
+  document.getElementById('salePrice').value = r.salePrice || 0;
+  document.getElementById('quantity').value = r.quantity || 1;
+  document.getElementById('intlShipping').value = r.intlShipping || 0;
+  document.getElementById('domShipping').value = r.domShipping || 0;
+  document.getElementById('packaging').value = r.packaging || 0;
+  document.getElementById('otherCost').value = r.otherCost || 0;
+  document.getElementById('platformFee').value = r.platformFeeRate || 0;
+  document.getElementById('fixedSalary').value = r.fixedSalary || 0;
+  document.getElementById('warehouseCost').value = r.warehouseCost || 0;
+  document.getElementById('socialInsurance').value = r.socialInsurance || 0;
+  document.getElementById('otherFixedCost').value = r.otherFixedCost || 0;
+  switchTab('calc', 0);
+  calculate();
+  showToast('已加载历史记录');
+}
+
+function clearHistory() {
+  if (confirm('确定要清空所有历史记录吗？')) {
+    state.history = [];
+    localStorage.setItem('daigou_history', '[]');
+    renderHistory();
+    showToast('历史记录已清空');
+  }
+}
+
+// ========== Settings ==========
+function showSettings() {
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalSheet').classList.add('show');
+}
+function closeSettings() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  document.getElementById('modalSheet').classList.remove('show');
+}
+function saveSettings() {
+  closeSettings();
+  showToast('设置已保存');
+}
+
+// ========== Toast ==========
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ========== Resize ==========
+window.addEventListener('resize', () => {});
+
+// ========== Start ==========
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
