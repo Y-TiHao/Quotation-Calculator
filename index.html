@@ -6,9 +6,7 @@
 <title>报价计算器</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#007AFF">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
 /* ========== iOS 26 Light (default) ========== */
 :root {
@@ -49,14 +47,16 @@
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html { font-size:16px; }
 body {
-  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   background: var(--bg);
   color: var(--label);
   min-height: 100vh; min-height: 100dvh;
   overflow-x: hidden;
   padding-top: calc(var(--safe-t));
-  padding-bottom: calc(84px + var(--safe-b));
+  padding-bottom: calc(50px + var(--safe-b) + 16px);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* ========== Nav Bar ========== */
@@ -81,6 +81,22 @@ body {
   cursor: pointer; color: var(--blue); transition: opacity 0.15s;
 }
 .nav-btn:active { opacity: 0.5; }
+
+/* ========== Nav Tabs (Desktop) ========== */
+.nav-tabs {
+  display: none;
+  gap: 4px;
+}
+.nav-tab {
+  padding: 6px 16px; border-radius: 8px;
+  border: none; background: transparent;
+  font-size: 14px; font-weight: 500; color: var(--tertiary);
+  cursor: pointer; transition: all 0.15s;
+  font-family: inherit;
+}
+.nav-tab:hover { background: var(--fill1); color: var(--label); }
+.nav-tab.active { background: var(--fill1); color: var(--blue); font-weight: 600; }
+.nav-tab:active { opacity: 0.6; }
 
 /* ========== Content ========== */
 .content { max-width: 720px; margin: 0 auto; padding: 0 0 24px; }
@@ -180,6 +196,46 @@ body {
 }
 .platform-select option { background: var(--card); color: var(--label); }
 
+/* ========== Currency Suffix Select ========== */
+.currency-suffix-select {
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 10 10'%3E%3Cpath fill='%23999' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0 center;
+  background-color: transparent;
+  padding-right: 12px; padding-left: 2px;
+  cursor: pointer;
+  color: var(--secondary); font-size: 15px; font-weight: 400;
+  border: none; outline: none;
+  flex-shrink: 0; min-width: 28px; text-align: right;
+  font-family: inherit;
+}
+@media (prefers-color-scheme: dark) {
+  .currency-suffix-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 10 10'%3E%3Cpath fill='%238E8E93' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+  }
+}
+.currency-suffix-select option { background: var(--card); color: var(--label); }
+
+/* ========== Rate Refresh ========== */
+.rate-refresh {
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--secondary);
+  transition: color 0.2s, transform 0.3s;
+  user-select: none;
+  line-height: 1;
+}
+.rate-refresh:hover { color: var(--label); }
+.rate-refresh.spinning {
+  animation: spin 0.8s linear infinite;
+  color: var(--orange);
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+
 /* ========== Nav Title ========== */
 .nav-title { font-size: 17px; font-weight: 700; letter-spacing: -0.2px; color: var(--label); }
 
@@ -261,27 +317,31 @@ body {
 /* ========== Tab Bar ========== */
 .tab-bar {
   position: fixed; bottom: 0; left: 0; right: 0;
-  height: calc(83px + var(--safe-b)); padding-bottom: var(--safe-b);
+  padding-bottom: var(--safe-b);
   background: rgba(249,249,249,0.88);
   backdrop-filter: saturate(200%) blur(20px);
   -webkit-backdrop-filter: saturate(200%) blur(20px);
   border-top: 0.5px solid var(--sep);
-  display: flex; z-index: 200;
+  z-index: 200;
 }
 @media (prefers-color-scheme: dark) {
   .tab-bar { background: rgba(28,28,30,0.88); }
 }
-.tab-bar-inner { display: flex; max-width: 720px; margin: 0 auto; width: 100%; }
+.tab-bar-inner {
+  display: flex; max-width: 720px; margin: 0 auto; width: 100%;
+  height: 50px;
+}
 .tab-item {
   flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 2px;
-  padding-top: 6px; cursor: pointer; border: none;
+  align-items: center; justify-content: center; gap: 1px;
+  cursor: pointer; border: none;
   background: none; color: var(--tertiary); transition: color 0.15s;
-  font-family: inherit;
+  font-family: inherit; padding: 0;
 }
+.tab-item svg { width: 22px; height: 22px; flex-shrink: 0; }
 .tab-item.active { color: var(--blue); }
 .tab-item:active { opacity: 0.5; }
-.tab-label { font-size: 10px; font-weight: 500; }
+.tab-label { font-size: 10px; font-weight: 500; line-height: 1; }
 
 /* ========== History ========== */
 .history-item {
@@ -363,14 +423,113 @@ body {
 .breakdown-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
 
 /* ========== Responsive ========== */
-@media (min-width: 768px) {
+
+/* iPhone SE / 小屏手机 */
+@media (max-width: 374px) {
+  html { font-size: 14px; }
+  .input-label { width: 60px; font-size: 13px; }
+  .input-field, .input-field-cost { font-size: 14px; }
+  .input-suffix { font-size: 14px; min-width: 24px; }
+  .section { margin: 16px 12px 0; }
+  .nav-bar-inner { padding: 0 12px; }
+  .profit-hero-value { font-size: 28px; }
+  .profit-hero { padding: 16px 12px 12px; }
+  .result-row { padding: 11px 12px; }
+  .input-group { padding: 10px 12px; gap: 12px; }
+  .price-item { padding: 8px 10px; }
+  .price-item-value { font-size: 15px; }
+  .btn { padding: 14px; font-size: 16px; }
+  .tab-label { font-size: 9px; }
+  .section-label { font-size: 12px; }
+  .history-item { padding: 10px 12px; }
+}
+
+/* 标准手机 (375px - 428px) */
+@media (min-width: 375px) and (max-width: 428px) {
+  html { font-size: 16px; }
+  .input-label { width: 72px; }
+}
+
+/* 大屏手机 (429px - 767px) */
+@media (min-width: 429px) and (max-width: 767px) {
+  html { font-size: 16px; }
+  .input-label { width: 80px; }
+  .section { margin: 20px 20px 0; }
+  .nav-bar-inner { padding: 0 24px; }
+}
+
+/* iPad / 平板竖屏 (768px - 1024px) — 保持与iPhone一致的iOS原生体验 */
+@media (min-width: 768px) and (max-width: 1024px) {
+  html { font-size: 16px; }
+  .input-label { width: 90px; }
+  .section { margin: 20px 24px 0; }
+  .nav-bar-inner { padding: 0 24px; }
+  .profit-hero { padding: 24px 20px 20px; }
+  .profit-hero-value { font-size: 38px; }
+  .input-group { padding: 14px 20px; gap: 16px; }
+  .result-row { padding: 14px 20px; }
+  .btn { padding: 14px; font-size: 16px; }
+  .tab-bar-inner { height: 56px; }
+  .tab-item svg { width: 26px; height: 26px; }
+  .tab-label { font-size: 11px; }
+  body { padding-bottom: calc(56px + var(--safe-b) + 16px); }
+}
+
+/* 桌面端 (>1024px) — 切换为桌面导航模式 */
+@media (min-width: 1025px) {
+  html { font-size: 16px; }
   body { padding-bottom: 0; }
   .tab-bar { display: none; }
-  .section { margin-left: auto; margin-right: auto; max-width: 500px; }
-  .input-label { width: 90px; }
+  .content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 32px 32px;
+  }
+  .section { margin-left: 0; margin-right: 0; max-width: 100%; }
+  .input-label { width: 100px; font-size: 15px; }
+  .input-field, .input-field-cost { font-size: 15px; }
+  .nav-bar-inner { padding: 0 32px; }
+  .profit-hero { padding: 28px 24px 24px; }
+  .profit-hero-value { font-size: 42px; }
+  .result-row { padding: 14px 20px; }
+  .input-group { padding: 14px 20px; gap: 16px; }
+  .card {
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s;
+  }
+  .btn { padding: 14px; font-size: 16px; }
+  /* 桌面端导航标签 */
+  .nav-tabs { display: flex; }
+  .nav-title { display: none; }
 }
-@media (max-width: 374px) {
-  .input-label { width: 64px; font-size: 14px; }
+
+/* iPhone 横屏适配 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .nav-bar-inner { height: 44px; }
+  .tab-bar-inner { height: 40px; }
+  .tab-item svg { width: 18px; height: 18px; }
+  .tab-label { font-size: 9px; }
+  .profit-hero { padding: 12px 16px 10px; }
+  .profit-hero-value { font-size: 26px; }
+  .section { margin-top: 12px; }
+  body { padding-bottom: calc(40px + var(--safe-b) + 12px); }
+}
+
+/* iPad 横屏适配 */
+@media (orientation: landscape) and (min-width: 768px) and (max-height: 1024px) {
+  .tab-bar-inner { height: 48px; }
+  .tab-item svg { width: 22px; height: 22px; }
+  body { padding-bottom: calc(48px + var(--safe-b) + 16px); }
+}
+
+/* 超宽屏居中限制 */
+@media (min-width: 1440px) {
+  .content { max-width: 860px; }
+  .nav-bar-inner { max-width: 860px; }
 }
 </style>
 </head>
@@ -380,6 +539,12 @@ body {
 <nav class="nav-bar">
   <div class="nav-bar-inner">
     <span class="nav-title">报价计算器</span>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('calc',0)">计算</button>
+      <button class="nav-tab" onclick="switchTab('cost',1)">成本</button>
+      <button class="nav-tab" onclick="switchTab('history',2)">历史</button>
+      <button class="nav-tab" onclick="switchTab('summary',3)">汇总</button>
+    </div>
   </div>
 </nav>
 
@@ -395,7 +560,24 @@ body {
           <div class="input-row">
             <span class="input-label">采购价</span>
             <input type="number" class="input-field" id="price" placeholder="0.00" step="0.01">
-            <span class="input-suffix">¥</span>
+            <select class="input-suffix currency-suffix-select" id="currencySelect" onchange="onCurrencyChange()">
+              <option value="CNY">¥</option>
+              <option value="HKD">HK$</option>
+              <option value="USD">$</option>
+              <option value="JPY">¥</option>
+            </select>
+          </div>
+          <div class="input-row" id="exchangeRateRow" style="display:none">
+            <span class="input-label">汇率</span>
+            <input type="number" class="input-field" id="exchangeRate" placeholder="0.90" step="0.0001" value="0.90">
+            <span class="input-suffix" style="gap:4px;display:flex;align-items:center">
+              <span id="rateLabel">HK$→¥</span>
+              <span class="rate-refresh" id="rateRefresh" onclick="fetchExchangeRate()" title="刷新汇率">↻</span>
+            </span>
+          </div>
+          <div class="input-row" id="priceCnyRow" style="display:none">
+            <span class="input-label">折合人民币</span>
+            <span class="result-value accent" id="priceCny" style="flex:1;text-align:right">¥0.00</span>
           </div>
           <div class="input-row">
             <span class="input-label">销售价</span>
@@ -452,7 +634,7 @@ body {
               <option value="5">得物</option>
             </select>
           </div>
-          <div class="input-row" id="platformFeeRow">
+          <div class="input-row" id="platformFeeRow" style="display:none">
             <span class="input-label">手续费率</span>
             <input type="number" class="input-field" id="platformFee" placeholder="0.00" step="0.01">
             <span class="input-suffix">%</span>
@@ -504,7 +686,7 @@ body {
           </div>
           <div class="result-row" id="dailyFixedRow" style="display:none">
             <span class="result-label"><span class="result-label-icon teal">🎯</span>保本日均销量</span>
-            <span class="result-value" id="dailyFixedTotal">0.0 件/天</span>
+            <span class="result-value" id="breakevenDaily">0.0 件/天</span>
           </div>
         </div>
       </div>
@@ -685,6 +867,12 @@ body {
       </svg>
       <span class="tab-label">历史</span>
     </button>
+    <button class="tab-item" onclick="switchTab('summary',3)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M3 3h18v18H3zM7 7h4v4H7zM13 7h4v4h-4zM7 13h4v4H7zM13 13h4v4h-4z"/>
+      </svg>
+      <span class="tab-label">汇总</span>
+    </button>
   </div>
 </div>
 
@@ -699,6 +887,46 @@ const state = {
   historyTimer: null
 };
 
+// ========== Fetch Exchange Rate ==========
+const CURRENCY_SYMBOLS = {
+  HKD: 'HK$',
+  JPY: '¥',
+  KRW: '₩',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  THB: '฿',
+  SGD: 'S$',
+  TWD: 'NT$',
+  AUD: 'A$',
+  CAD: 'C$',
+};
+
+async function fetchExchangeRate() {
+  const currency = document.getElementById('currencySelect').value;
+  if (currency === 'CNY') return;
+
+  const refreshBtn = document.getElementById('rateRefresh');
+  refreshBtn.classList.add('spinning');
+
+  try {
+    // frankfurter.app: free, no key, based on ECB data
+    const res = await fetch(`https://api.frankfurter.app/latest?from=${currency}&to=CNY`);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    const rate = data.rates.CNY;
+    if (rate) {
+      document.getElementById('exchangeRate').value = rate.toFixed(4);
+      calculate();
+    }
+  } catch (e) {
+    // 静默失败，保留当前值
+    console.warn('汇率获取失败，使用当前值:', e);
+  } finally {
+    refreshBtn.classList.remove('spinning');
+  }
+}
+
 // ========== Init ==========
 function init() {
   document.querySelectorAll('.input-field').forEach(input => {
@@ -707,8 +935,16 @@ function init() {
   document.querySelectorAll('.cost-input').forEach(input => {
     input.addEventListener('input', () => { calculateCost(); });
   });
+  document.getElementById('targetMargin').addEventListener('input', calculate);
+  document.getElementById('summaryMonth').addEventListener('change', renderSummary);
+  // Set default month
+  const now = new Date();
+  document.getElementById('summaryMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   calculateCost();
   renderHistory();
+  renderSummary();
+  // 自动获取汇率
+  fetchExchangeRate();
 }
 
 // ========== Cost Page ==========
@@ -769,11 +1005,17 @@ function switchTab(tab, index) {
   document.querySelectorAll('.tab-item').forEach((t, i) => {
     t.classList.toggle('active', i === index);
   });
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === index);
+  });
 }
 
 // ========== Calculate ==========
 function calculate() {
-  const price = parseFloat(document.getElementById('price').value) || 0;
+  const rawPrice = parseFloat(document.getElementById('price').value) || 0;
+  const currency = document.getElementById('currencySelect').value;
+  const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 0.90;
+  const price = currency === 'HKD' ? rawPrice * exchangeRate : rawPrice;
   const salePrice = parseFloat(document.getElementById('salePrice').value) || 0;
   const quantity = parseInt(document.getElementById('quantity').value) || 1;
   const intlShipping = parseFloat(document.getElementById('intlShipping').value) || 0;
@@ -785,6 +1027,11 @@ function calculate() {
   const warehouseCost = parseFloat(document.getElementById('warehouseCost').value) || 0;
   const socialInsurance = parseFloat(document.getElementById('socialInsurance').value) || 0;
   const otherFixedCost = parseFloat(document.getElementById('otherFixedCost').value) || 0;
+
+  // 更新折合人民币显示
+  if (currency !== 'CNY') {
+    document.getElementById('priceCny').textContent = `¥${price.toFixed(2)}`;
+  }
 
   const monthlyFixedTotal = fixedSalary + warehouseCost + socialInsurance + otherFixedCost;
   const dailyFixedTotal = monthlyFixedTotal / 30;
@@ -848,9 +1095,9 @@ function calculate() {
     document.getElementById('monthlyFixedTotal').textContent = `¥${dailyFixedTotal.toFixed(2)} / 天`;
     const grossPerUnit = salePrice - costPerUnit;
     if (grossPerUnit > 0) {
-      document.getElementById('dailyFixedTotal').textContent = `需售 ${(dailyFixedTotal / grossPerUnit).toFixed(1)} 件/天 保本`;
+      document.getElementById('breakevenDaily').textContent = `需售 ${(dailyFixedTotal / grossPerUnit).toFixed(1)} 件/天 保本`;
     } else {
-      document.getElementById('dailyFixedTotal').textContent = '售价低于采购价，无法保本';
+      document.getElementById('breakevenDaily').textContent = '售价低于采购价，无法保本';
     }
   } else {
     fixedCostRow.style.display = 'none';
@@ -860,19 +1107,40 @@ function calculate() {
 
   const costWithoutPlatform = costPerUnit + shippingPerUnit + packagingPerUnit + otherPerUnit;
   renderPriceGrid(costWithoutPlatform);
+  reverseCalculate();
 
   if (price > 0 && salePrice > 0) {
     clearTimeout(state.historyTimer);
     state.historyTimer = setTimeout(() => {
       addHistory({
-        date: new Date().toISOString(), price, salePrice, quantity,
+        date: new Date().toISOString(), price: rawPrice, salePrice, quantity,
         intlShipping, domShipping, packaging, otherCost, platformFeeRate,
         fixedSalary, warehouseCost, socialInsurance, otherFixedCost,
+        currency, exchangeRate,
         netProfit: netProfitVal, totalProfit: totalProfitVal,
         netMargin: netMarginVal, grossMargin: grossMarginVal
       });
     }, 1000);
   }
+}
+
+// ========== Currency Change ==========
+function onCurrencyChange() {
+  const currency = document.getElementById('currencySelect').value;
+  const exchangeRateRow = document.getElementById('exchangeRateRow');
+  const priceCnyRow = document.getElementById('priceCnyRow');
+  const rateLabel = document.getElementById('rateLabel');
+  if (currency !== 'CNY') {
+    exchangeRateRow.style.display = '';
+    priceCnyRow.style.display = '';
+    const symbol = CURRENCY_SYMBOLS[currency] || currency;
+    rateLabel.textContent = `${symbol}→¥`;
+    fetchExchangeRate();
+  } else {
+    exchangeRateRow.style.display = 'none';
+    priceCnyRow.style.display = 'none';
+  }
+  calculate();
 }
 
 // ========== Platform Select ==========
@@ -979,10 +1247,11 @@ function renderHistory() {
     const d = new Date(r.date);
     const ds = `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
     const cls = r.netProfit >= 0 ? 'positive' : 'negative';
+    const currSymbol = r.currency === 'HKD' ? 'HK$' : '¥';
     html += `<div class="history-item" onclick="loadHistory(${i})">
       <div class="history-content">
-        <div class="history-title">采购 ¥${r.price.toFixed(0)} → 销售 ¥${r.salePrice.toFixed(0)} × ${r.quantity}</div>
-        <div class="history-subtitle">${ds}</div>
+        <div class="history-title">采购 ${currSymbol}${r.price.toFixed(0)} → 销售 ¥${r.salePrice.toFixed(0)} × ${r.quantity}</div>
+        <div class="history-subtitle">${ds}${r.currency === 'HKD' ? ' · 汇率' + (r.exchangeRate || '0.90') : ''}</div>
       </div>
       <div>
         <div class="history-value">¥${r.totalProfit.toFixed(0)}</div>
@@ -1007,6 +1276,11 @@ function loadHistory(i) {
   document.getElementById('warehouseCost').value = r.warehouseCost || 0;
   document.getElementById('socialInsurance').value = r.socialInsurance || 0;
   document.getElementById('otherFixedCost').value = r.otherFixedCost || 0;
+  // 恢复币种和汇率
+  const currency = r.currency || 'CNY';
+  document.getElementById('currencySelect').value = currency;
+  if (r.exchangeRate) document.getElementById('exchangeRate').value = r.exchangeRate;
+  onCurrencyChange();
   switchTab('calc', 0);
   calculate();
   showToast('已加载历史记录');
@@ -1029,13 +1303,125 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+// ========== Reverse Calculate ==========
+function reverseCalculate() {
+  const rawPrice = parseFloat(document.getElementById('price').value) || 0;
+  const currency = document.getElementById('currencySelect').value;
+  const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 0.90;
+  const price = currency === 'HKD' ? rawPrice * exchangeRate : rawPrice;
+  const intlShipping = parseFloat(document.getElementById('intlShipping').value) || 0;
+  const domShipping = parseFloat(document.getElementById('domShipping').value) || 0;
+  const packaging = parseFloat(document.getElementById('packaging').value) || 0;
+  const otherCost = parseFloat(document.getElementById('otherCost').value) || 0;
+  const quantity = parseInt(document.getElementById('quantity').value) || 1;
+  const platformFeeRate = parseFloat(document.getElementById('platformFee').value) || 0;
+  const targetMargin = parseFloat(document.getElementById('targetMargin').value) || 0;
+
+  if (price <= 0 || targetMargin <= 0) {
+    document.getElementById('reversePrice').textContent = '--';
+    document.getElementById('reverseProfit').textContent = '--';
+    return;
+  }
+
+  const costPerUnit = price + (intlShipping + domShipping) / quantity + packaging / quantity + otherCost / quantity;
+  const targetPrice = costPerUnit / (1 - targetMargin / 100 - platformFeeRate / 100);
+
+  if (targetPrice <= 0 || isNaN(targetPrice) || !isFinite(targetPrice)) {
+    document.getElementById('reversePrice').textContent = '无法计算';
+    document.getElementById('reverseProfit').textContent = '--';
+    return;
+  }
+
+  const platformFee = targetPrice * (platformFeeRate / 100);
+  const targetProfit = targetPrice - costPerUnit - platformFee;
+
+  document.getElementById('reversePrice').textContent = `¥${targetPrice.toFixed(2)}`;
+  document.getElementById('reverseProfit').textContent = `¥${targetProfit.toFixed(2)} / 件`;
+}
+
+// ========== Summary ==========
+function renderSummary() {
+  const monthVal = document.getElementById('summaryMonth').value;
+  if (!monthVal) return;
+  const [year, month] = monthVal.split('-').map(Number);
+  const records = state.history.filter(r => {
+    const d = new Date(r.date);
+    return d.getFullYear() === year && (d.getMonth() + 1) === month;
+  });
+
+  const count = records.length;
+  const totalSale = records.reduce((s, r) => s + r.salePrice * r.quantity, 0);
+  const totalPurchase = records.reduce((s, r) => s + r.price * r.quantity, 0);
+  const totalProfit = records.reduce((s, r) => s + r.totalProfit, 0);
+  const avgMargin = totalSale > 0 ? (totalProfit / totalSale * 100) : 0;
+  const maxProfit = count > 0 ? Math.max(...records.map(r => r.netProfit)) : 0;
+  const minProfit = count > 0 ? Math.min(...records.map(r => r.netProfit)) : 0;
+
+  const profitClass = totalProfit > 0 ? 'positive' : totalProfit < 0 ? 'negative' : '';
+  const badgeClass = totalProfit > 0 ? (avgMargin > 20 ? 'good' : 'warning') : 'danger';
+  const badgeLabel = totalProfit > 0 ? (avgMargin > 20 ? '利润良好' : '利润偏低') : '亏损';
+
+  document.getElementById('summaryTotalProfit').textContent = `¥${totalProfit.toFixed(2)}`;
+  document.getElementById('summaryTotalProfit').className = `profit-hero-value ${profitClass}`;
+  document.getElementById('summaryCount').textContent = count;
+  document.getElementById('summaryBadge').textContent = badgeLabel;
+  document.getElementById('summaryBadge').className = `profit-badge ${badgeClass}`;
+  document.getElementById('summaryTotalSale').textContent = `¥${totalSale.toFixed(2)}`;
+  document.getElementById('summaryTotalPurchase').textContent = `¥${totalPurchase.toFixed(2)}`;
+  document.getElementById('summaryAvgMargin').textContent = `${avgMargin.toFixed(2)}%`;
+  document.getElementById('summaryMaxProfit').textContent = `¥${maxProfit.toFixed(2)}`;
+  document.getElementById('summaryMinProfit').textContent = `¥${minProfit.toFixed(2)}`;
+}
+
+// ========== Export ==========
+function exportData() {
+  const monthVal = document.getElementById('summaryMonth').value;
+  let records = state.history;
+  if (monthVal) {
+    const [year, month] = monthVal.split('-').map(Number);
+    records = records.filter(r => {
+      const d = new Date(r.date);
+      return d.getFullYear() === year && (d.getMonth() + 1) === month;
+    });
+  }
+  if (records.length === 0) { showToast('没有可导出的数据'); return; }
+  const header = '日期,采购价,销售价,数量,国际运费,国内运费,包装费,其他费用,手续费率,净利润,总利润,净利率,毛利率';
+  const rows = records.map(r => {
+    const d = new Date(r.date);
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return [ds, r.price, r.salePrice, r.quantity, r.intlShipping, r.domShipping, r.packaging, r.otherCost, r.platformFeeRate, r.netProfit.toFixed(2), r.totalProfit.toFixed(2), r.netMargin.toFixed(2), r.grossMargin.toFixed(2)].join(',');
+  });
+  const csv = '\uFEFF' + header + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `daigou_${monthVal || 'all'}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('CSV已导出');
+}
+
+function exportJSON() {
+  const monthVal = document.getElementById('summaryMonth').value;
+  let records = state.history;
+  if (monthVal) {
+    const [year, month] = monthVal.split('-').map(Number);
+    records = records.filter(r => {
+      const d = new Date(r.date);
+      return d.getFullYear() === year && (d.getMonth() + 1) === month;
+    });
+  }
+  if (records.length === 0) { showToast('没有可导出的数据'); return; }
+  const json = JSON.stringify(records, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `daigou_${monthVal || 'all'}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('JSON已导出');
+}
+
 // ========== Start ==========
 document.addEventListener('DOMContentLoaded', init);
-
-// ========== PWA Service Worker ==========
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js').catch(() => {});
-}
 </script>
 </body>
 </html>
