@@ -591,9 +591,10 @@ body {
     <div class="nav-tabs">
       <button class="nav-tab active" onclick="switchTab('quick',0)">速算</button>
       <button class="nav-tab" onclick="switchTab('calc',1)">计算</button>
-      <button class="nav-tab" onclick="switchTab('cost',2)">成本</button>
-      <button class="nav-tab" onclick="switchTab('history',3)">历史</button>
-      <button class="nav-tab" onclick="switchTab('summary',4)">汇总</button>
+      <button class="nav-tab" onclick="switchTab('tax',2)">退税</button>
+      <button class="nav-tab" onclick="switchTab('cost',3)">成本</button>
+      <button class="nav-tab" onclick="switchTab('history',4)">历史</button>
+      <button class="nav-tab" onclick="switchTab('summary',5)">汇总</button>
     </div>
   </div>
 </nav>
@@ -950,6 +951,193 @@ body {
 
   </div>
 
+  <!-- 退税页 -->
+  <div id="tab-tax" class="tab-content">
+
+    <!-- 第1步：税价 -->
+    <div class="section">
+      <div class="section-label">① 税价</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">商品原价</span>
+            <input type="number" class="input-field" id="taxOriginalPrice" placeholder="0.00" step="0.01" min="0">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="input-row">
+            <span class="input-label">税率</span>
+            <input type="number" class="input-field" id="taxRate" placeholder="10" step="0.1" min="0" value="10">
+            <span class="input-suffix">%</span>
+          </div>
+          <div class="quick-btns">
+            <button class="quick-btn" onclick="setTaxRate(5)">5%</button>
+            <button class="quick-btn" onclick="setTaxRate(8)">8%</button>
+            <button class="quick-btn" onclick="setTaxRate(10)">10%</button>
+            <button class="quick-btn" onclick="setTaxRate(13)">13%</button>
+          </div>
+          <div class="result-divider"></div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon blue">💰</span>税价（含税价）</span>
+            <span class="result-value accent" id="taxPriceDisplay">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon orange">📋</span>税额</span>
+            <span class="result-value" id="taxAmountDisplay">¥0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第2步：退税价 -->
+    <div class="section">
+      <div class="section-label">② 退税价</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">退税率</span>
+            <input type="number" class="input-field" id="refundRate" placeholder="10" step="0.1" min="0" value="10">
+            <span class="input-suffix">%</span>
+          </div>
+          <div class="quick-btns">
+            <button class="quick-btn" onclick="setRefundRate(5)">5%</button>
+            <button class="quick-btn" onclick="setRefundRate(8)">8%</button>
+            <button class="quick-btn" onclick="setRefundRate(10)">10%</button>
+            <button class="quick-btn" onclick="setRefundRate(12)">12%</button>
+          </div>
+          <div class="result-divider"></div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">💎</span>退税金额</span>
+            <span class="result-value positive" id="refundAmountDisplay">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">💎</span>退税价（退税后实际成本）</span>
+            <span class="result-value accent" id="refundPriceDisplay">¥0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第3步：手续费 -->
+    <div class="section">
+      <div class="section-label">③ 手续费</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">手续费率</span>
+            <input type="number" class="input-field" id="taxServiceFeeRate" placeholder="0" step="0.1" min="0" value="1.5">
+            <span class="input-suffix">%</span>
+          </div>
+          <div class="quick-btns">
+            <button class="quick-btn" onclick="setServiceFeeRate(0)">0%</button>
+            <button class="quick-btn" onclick="setServiceFeeRate(1)">1%</button>
+            <button class="quick-btn" onclick="setServiceFeeRate(1.5)">1.5%</button>
+            <button class="quick-btn" onclick="setServiceFeeRate(2)">2%</button>
+          </div>
+          <div class="input-row">
+            <span class="input-label">固定手续费</span>
+            <input type="number" class="input-field" id="taxServiceFeeFixed" placeholder="0.00" step="0.01" min="0" value="0">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="result-divider"></div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon orange">📦</span>手续费金额</span>
+            <span class="result-value" id="serviceFeeDisplay">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">💎</span>扣除手续费后实际成本</span>
+            <span class="result-value accent" id="afterFeePriceDisplay">¥0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第4步：返点 -->
+    <div class="section">
+      <div class="section-label">④ 返点</div>
+      <div class="card">
+        <div class="input-group">
+          <div class="input-row">
+            <span class="input-label">返点率</span>
+            <input type="number" class="input-field" id="rebateRate" placeholder="0" step="0.1" min="0" value="0">
+            <span class="input-suffix">%</span>
+          </div>
+          <div class="quick-btns">
+            <button class="quick-btn" onclick="setRebateRate(0)">0%</button>
+            <button class="quick-btn" onclick="setRebateRate(3)">3%</button>
+            <button class="quick-btn" onclick="setRebateRate(5)">5%</button>
+            <button class="quick-btn" onclick="setRebateRate(8)">8%</button>
+            <button class="quick-btn" onclick="setRebateRate(10)">10%</button>
+          </div>
+          <div class="input-row">
+            <span class="input-label">固定返点</span>
+            <input type="number" class="input-field" id="rebateFixed" placeholder="0.00" step="0.01" min="0" value="0">
+            <span class="input-suffix">¥</span>
+          </div>
+          <div class="result-divider"></div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon pink">🏷️</span>返点金额</span>
+            <span class="result-value positive" id="rebateAmountDisplay">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">💎</span>最终实际成本</span>
+            <span class="result-value accent large" id="finalPriceDisplay">¥0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 退税汇总 -->
+    <div class="section">
+      <div class="section-label">退税汇总</div>
+      <div class="card">
+        <div class="profit-hero">
+          <div class="profit-hero-header">
+            <span class="profit-hero-label">成本节省</span>
+            <span class="profit-badge" id="taxSavingBadge">--</span>
+          </div>
+          <div class="profit-hero-value positive" id="taxSavingDisplay">¥0.00</div>
+          <div class="profit-hero-sub">相比税价节省 <span id="taxSavingRateDisplay">0.00%</span></div>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-group">
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon blue">💰</span>税价（含税价）</span>
+            <span class="result-value" id="summaryTaxPrice">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">💎</span>最终实际成本</span>
+            <span class="result-value accent" id="summaryFinalPrice">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon green">📈</span>退税金额</span>
+            <span class="result-value positive" id="summaryRefundAmount">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon orange">📦</span>手续费</span>
+            <span class="result-value" id="summaryServiceFee">¥0.00</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label"><span class="result-label-icon pink">🏷️</span>返点</span>
+            <span class="result-value positive" id="summaryRebate">¥0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="padding:14px 16px;border-radius:12px;background:var(--fill1);border:1px solid var(--sep);">
+        <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">💡 退税计算说明</div>
+        <div style="font-size:12px;line-height:1.8;color:var(--secondary);">
+          <div><b>① 税价：</b>商品原价 × (1 + 税率) = 含税价</div>
+          <div><b>② 退税价：</b>含税价 − 退税金额（含税价 × 退税率）</div>
+          <div><b>③ 手续费：</b>退税金额 × 手续费率 + 固定手续费</div>
+          <div><b>④ 返点：</b>含税价 × 返点率 + 固定返点</div>
+          <div><b>最终成本：</b>含税价 − 退税金额 + 手续费 − 返点</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 成本页 -->
   <div id="tab-cost" class="tab-content">
     <div class="section">
@@ -1095,19 +1283,25 @@ body {
       </svg>
       <span class="tab-label">计算</span>
     </button>
-    <button class="tab-item" onclick="switchTab('cost',2)">
+    <button class="tab-item" onclick="switchTab('tax',2)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M12 2v6l3 3"/><path d="M12 2v6l-3 3"/><path d="M4 12h16"/><path d="M6 16h12"/><path d="M8 20h8"/>
+      </svg>
+      <span class="tab-label">退税</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('cost',3)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><circle cx="12" cy="12" r="5"/>
       </svg>
       <span class="tab-label">成本</span>
     </button>
-    <button class="tab-item" onclick="switchTab('history',3)">
+    <button class="tab-item" onclick="switchTab('history',4)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg>
       <span class="tab-label">历史</span>
     </button>
-    <button class="tab-item" onclick="switchTab('summary',4)">
+    <button class="tab-item" onclick="switchTab('summary',5)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <path d="M3 3h18v18H3zM7 7h4v4H7zM13 7h4v4h-4zM7 13h4v4H7zM13 13h4v4h-4z"/>
       </svg>
@@ -1300,9 +1494,87 @@ async function fetchExchangeRate() {
   refreshBtn.classList.remove('spinning');
 }
 
+// ========== Tax Refund Calc (退税页) ==========
+function taxCalc() {
+  const originalPrice = parseFloat(document.getElementById('taxOriginalPrice').value) || 0;
+  const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+  const refundRate = parseFloat(document.getElementById('refundRate').value) || 0;
+  const serviceFeeRate = parseFloat(document.getElementById('taxServiceFeeRate').value) || 0;
+  const serviceFeeFixed = parseFloat(document.getElementById('taxServiceFeeFixed').value) || 0;
+  const rebateRate = parseFloat(document.getElementById('rebateRate').value) || 0;
+  const rebateFixed = parseFloat(document.getElementById('rebateFixed').value) || 0;
+
+  // ① 税价
+  const taxAmount = originalPrice * (taxRate / 100);
+  const taxPrice = originalPrice + taxAmount;
+  document.getElementById('taxPriceDisplay').textContent = `¥${taxPrice.toFixed(2)}`;
+  document.getElementById('taxAmountDisplay').textContent = `¥${taxAmount.toFixed(2)}`;
+
+  // ② 退税价
+  const refundAmount = taxPrice * (refundRate / 100);
+  const refundPrice = taxPrice - refundAmount;
+  document.getElementById('refundAmountDisplay').textContent = `¥${refundAmount.toFixed(2)}`;
+  document.getElementById('refundPriceDisplay').textContent = `¥${refundPrice.toFixed(2)}`;
+
+  // ③ 手续费
+  const serviceFee = refundAmount * (serviceFeeRate / 100) + serviceFeeFixed;
+  const afterFeePrice = refundPrice + serviceFee;
+  document.getElementById('serviceFeeDisplay').textContent = `¥${serviceFee.toFixed(2)}`;
+  document.getElementById('afterFeePriceDisplay').textContent = `¥${afterFeePrice.toFixed(2)}`;
+
+  // ④ 返点
+  const rebateAmount = taxPrice * (rebateRate / 100) + rebateFixed;
+  const finalPrice = afterFeePrice - rebateAmount;
+  document.getElementById('rebateAmountDisplay').textContent = `¥${rebateAmount.toFixed(2)}`;
+  document.getElementById('finalPriceDisplay').textContent = `¥${finalPrice.toFixed(2)}`;
+
+  // 退税汇总
+  const saving = taxPrice - finalPrice;
+  const savingRate = taxPrice > 0 ? (saving / taxPrice * 100) : 0;
+  const savingClass = saving > 0 ? 'positive' : saving < 0 ? 'negative' : '';
+  const badgeClass = saving > 0 ? (savingRate > 10 ? 'good' : 'warning') : 'danger';
+  const badgeLabel = saving > 0 ? (savingRate > 10 ? '节省良好' : '节省偏低') : '成本增加';
+
+  const savingEl = document.getElementById('taxSavingDisplay');
+  savingEl.textContent = `¥${saving.toFixed(2)}`;
+  savingEl.className = `profit-hero-value ${savingClass}`;
+
+  document.getElementById('taxSavingRateDisplay').textContent = `${savingRate.toFixed(2)}%`;
+
+  const badge = document.getElementById('taxSavingBadge');
+  badge.textContent = badgeLabel;
+  badge.className = `profit-badge ${badgeClass}`;
+
+  document.getElementById('summaryTaxPrice').textContent = `¥${taxPrice.toFixed(2)}`;
+  document.getElementById('summaryFinalPrice').textContent = `¥${finalPrice.toFixed(2)}`;
+  document.getElementById('summaryRefundAmount').textContent = `¥${refundAmount.toFixed(2)}`;
+  document.getElementById('summaryServiceFee').textContent = `¥${serviceFee.toFixed(2)}`;
+  document.getElementById('summaryRebate').textContent = `¥${rebateAmount.toFixed(2)}`;
+}
+
+function setTaxRate(val) {
+  document.getElementById('taxRate').value = val;
+  taxCalc();
+}
+
+function setRefundRate(val) {
+  document.getElementById('refundRate').value = val;
+  taxCalc();
+}
+
+function setServiceFeeRate(val) {
+  document.getElementById('taxServiceFeeRate').value = val;
+  taxCalc();
+}
+
+function setRebateRate(val) {
+  document.getElementById('rebateRate').value = val;
+  taxCalc();
+}
+
 // ========== Init ==========
 function init() {
-  document.querySelectorAll('.input-field:not(#tab-quick .input-field)').forEach(input => {
+  document.querySelectorAll('.input-field:not(#tab-quick .input-field):not(#tab-tax .input-field)').forEach(input => {
     input.addEventListener('input', () => {
       clearTimeout(state._calcTimer);
       state._calcTimer = setTimeout(calculate, 150);
@@ -1321,6 +1593,14 @@ function init() {
     input.addEventListener('input', () => {
       clearTimeout(state._qCalcTimer);
       state._qCalcTimer = setTimeout(quickCalc, 100);
+    });
+  });
+
+  // 退税页输入监听
+  document.querySelectorAll('#tab-tax .input-field').forEach(input => {
+    input.addEventListener('input', () => {
+      clearTimeout(state._taxCalcTimer);
+      state._taxCalcTimer = setTimeout(taxCalc, 100);
     });
   });
 
